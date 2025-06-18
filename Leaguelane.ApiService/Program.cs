@@ -38,9 +38,6 @@ builder.RegisterServices();
 
 builder.JwtConfiguration();
 
-builder.Services.AddSingleton(x =>
-    new BlobServiceClient(builder.Configuration["ConnectionStrings:BlobStorageConnection"]));
-
 var app = builder.Build();
 
 app.UseCors("AllowAll");
