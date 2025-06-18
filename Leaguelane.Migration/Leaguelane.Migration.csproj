@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-Leaguelane.Migration-43f0f389-ff5c-4251-bf42-609246fa5efe</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Leaguelane.Enums\Leaguelane.Enums.csproj" />
+    <ProjectReference Include="..\Leaguelane.Persistence\Leaguelane.Persistence.csproj" />
+    <ProjectReference Include="..\Leaguelane.ServiceDefaults\Leaguelane.ServiceDefaults.csproj" />
+  </ItemGroup>
+</Project>

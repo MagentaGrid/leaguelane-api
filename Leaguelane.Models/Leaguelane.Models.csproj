@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Leaguelane.Enums\Leaguelane.Enums.csproj" />
+    <ProjectReference Include="..\Leaguelane.Persistence\Leaguelane.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>
