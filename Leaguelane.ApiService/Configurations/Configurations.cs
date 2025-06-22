@@ -31,6 +31,9 @@ namespace Leaguelane.Api.Configurations
             //About us services
             services.AddScoped<IAboutService, AboutService>();
 
+            //Register sport services
+            services.AddScoped<ISportService, SportService>();
+
 
             return services;
         }
@@ -47,7 +50,10 @@ namespace Leaguelane.Api.Configurations
             //About us repositories
             services.AddScoped<IAboutRepository, AboutRepository>();
 
-           
+            //Register sport repositories
+            services.AddScoped<ISportRepository, SportRepository>();
+
+
             return services;
         }
     }
