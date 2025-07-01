@@ -22,7 +22,8 @@ namespace Leaguelane.Scheduler
                             tgr
                                 .ForJob(JobKey.Create(nameof(SeasonsScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    .WithIntervalInMinutes(2)
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
                                     .RepeatForever()));
                 
             });
