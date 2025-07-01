@@ -33,6 +33,8 @@
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.11.8" />
     <PackageVersion Include="Aspire.StackExchange.Redis.OutputCaching" Version="9.2.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
+    <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.14.0" />
+    <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.14.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
   </ItemGroup>
 </Project>

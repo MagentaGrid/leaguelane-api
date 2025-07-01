@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Leaguelane.Models\Leaguelane.Models.csproj" />
     <ProjectReference Include="..\Leaguelane.Repository\Leaguelane.Repository.csproj" />
   </ItemGroup>
 
