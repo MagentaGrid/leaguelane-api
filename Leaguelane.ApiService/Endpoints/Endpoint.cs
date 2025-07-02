@@ -10,6 +10,7 @@ namespace Leaguelane.ApiService.Endpoints
             app.MapGroup("/users").AddUserRoutes().WithTags("User").WithName("User");
             app.MapGroup("/contacts").AddContactRoutes().WithTags("Contact").WithName("Contact");
             app.MapGroup("/about").AddAboutRoutes().WithTags("About").WithName("About");
+            app.MapGroup("/sports").AddSportRoutes().WithTags("Sport").WithName("Sport");
         }
     }
 }

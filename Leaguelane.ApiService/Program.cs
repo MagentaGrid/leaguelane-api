@@ -2,6 +2,7 @@ using Leaguelane.Api.Configurations;
 using Leaguelane.ApiService.Endpoints;
 using Leaguelane.Persistence.Context;
 using Azure.Storage.Blobs;
+using Leaguelane.Scheduler;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,8 @@ builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
 });
+
+builder.Services.AddScheduler();
 
 builder.RegisterServices();
 
