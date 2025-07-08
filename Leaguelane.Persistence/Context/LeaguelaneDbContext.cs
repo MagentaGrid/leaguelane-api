@@ -14,4 +14,7 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<About> Abouts => Set<About>();
     public DbSet<Sport> Sports => Set<Sport>();
     public DbSet<Season> Seasons => Set<Season>();
+    public DbSet<Country> Countries => Set<Country>();
+    public DbSet<League> Leagues => Set<League>();
+    public DbSet<LeagueSeason> LeagueSeasons => Set<LeagueSeason>();
 }

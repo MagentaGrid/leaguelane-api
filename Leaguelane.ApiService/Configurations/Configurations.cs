@@ -37,6 +37,12 @@ namespace Leaguelane.Api.Configurations
             //Register season services
             services.AddScoped<ISeasonService, SeasonService>();
 
+            //Register country services
+            services.AddScoped<ICountryService, CountryService>();
+
+            //Register league services
+            services.AddScoped<ILeagueService, LeagueService>();
+
 
             return services;
         }
@@ -58,6 +64,15 @@ namespace Leaguelane.Api.Configurations
 
             //Register season repositories
             services.AddScoped<ISeasonRepository, SeasonRepository>();
+
+            //Register country repositories
+            services.AddScoped<ICountryRepository, CountryRepository>();
+
+            //Register league repositories
+            services.AddScoped<ILeagueRepository, LeagueRepository>();
+
+            //Register league season repositories
+            services.AddScoped<ILeagueSeasonRepository, LeagueSeasonRepository>();
 
             return services;
         }
