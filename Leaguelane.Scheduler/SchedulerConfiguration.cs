@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Leaguelane.Scheduler
 {
-    public static class DependencyInjection
+    public static class SchedulerConfiguration
     {
         public static void  AddScheduler(this IServiceCollection services)
         {
@@ -17,13 +17,13 @@ namespace Leaguelane.Scheduler
             {
                 q.UseMicrosoftDependencyInjectionJobFactory();
 
-                q.AddJob<SeasonsScheduler>(JobKey.Create(nameof(SeasonsScheduler)))
+                q.AddJob<FootbalApiScheduler>(JobKey.Create(nameof(FootbalApiScheduler)))
                     .AddTrigger(tgr => 
                             tgr
-                                .ForJob(JobKey.Create(nameof(SeasonsScheduler)))
+                                .ForJob(JobKey.Create(nameof(FootbalApiScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
+                                    .WithIntervalInMinutes(2)
+                                    //.WithIntervalInHours(24)
                                     .RepeatForever()));
                 
             });
