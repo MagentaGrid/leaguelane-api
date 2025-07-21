@@ -43,6 +43,8 @@ namespace Leaguelane.Api.Configurations
             //Register league services
             services.AddScoped<ILeagueService, LeagueService>();
 
+            //Register Audit services
+            services.AddScoped<IAuditService, AuditService>();
 
             return services;
         }
@@ -73,6 +75,9 @@ namespace Leaguelane.Api.Configurations
 
             //Register league season repositories
             services.AddScoped<ILeagueSeasonRepository, LeagueSeasonRepository>();
+
+            //Register Audit repositories
+            services.AddScoped<IAuditRepository, AuditRepository>();
 
             return services;
         }

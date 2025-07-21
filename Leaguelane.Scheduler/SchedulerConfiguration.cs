@@ -17,15 +17,33 @@ namespace Leaguelane.Scheduler
             {
                 q.UseMicrosoftDependencyInjectionJobFactory();
 
-                q.AddJob<FootbalApiScheduler>(JobKey.Create(nameof(FootbalApiScheduler)))
+                q.AddJob<SeasonsScheduler>(JobKey.Create(nameof(SeasonsScheduler)))
                     .AddTrigger(tgr => 
                             tgr
-                                .ForJob(JobKey.Create(nameof(FootbalApiScheduler)))
+                                .ForJob(JobKey.Create(nameof(SeasonsScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
+                                    .RepeatForever()));
+
+                q.AddJob<LeagueScheduler>(JobKey.Create(nameof(LeagueScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(LeagueScheduler)))
                                 .WithSimpleSchedule(s => s
                                     .WithIntervalInMinutes(2)
                                     //.WithIntervalInHours(24)
                                     .RepeatForever()));
-                
+
+                q.AddJob<CountryScheduler>(JobKey.Create(nameof(CountryScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(CountryScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    .WithIntervalInMinutes(2)
+                                    //.WithIntervalInHours(24)
+                                    .RepeatForever()));
+
             });
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
