@@ -1,5 +1,6 @@
 ﻿using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,11 @@ namespace Leaguelane.Repository.Repositories
             _context.Leagues.AddRange(leaguesToBeAdded);
             await _context.SaveChangesAsync(cancellationToken);
             return true;
+        }
+
+        public async Task<List<League>> GetAllActiveLeagues(CancellationToken cancellationToken)
+        {
+            return await _context.Leagues.Where(x => x.Active == true && x.CurrentSeason >= DateTime.Now.Year).ToListAsync(cancellationToken);
         }
     }
 }

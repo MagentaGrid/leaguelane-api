@@ -10,5 +10,6 @@ namespace Leaguelane.Repository.Repositories
     public interface ILeagueRepository
     {
         Task<bool> AddLeagues(List<League> leagues, CancellationToken cancellationToken);
+        Task<List<League>> GetAllActiveLeagues(CancellationToken cancellationToken);
     }
 }

@@ -12,9 +12,6 @@ namespace Leaguelane.Models.Dtos
         [JsonPropertyName("get")]
         public string Get { get; set; }
 
-        [JsonPropertyName("parameters")]
-        public List<object> Parameters { get; set; }
-
         [JsonPropertyName("errors")]
         public List<string> Errors { get; set; }
 

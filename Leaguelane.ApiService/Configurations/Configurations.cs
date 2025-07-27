@@ -49,6 +49,9 @@ namespace Leaguelane.Api.Configurations
             //Register job configuration services
             services.AddScoped<IJobConfigurationService, JobConfigurationService>();
 
+            //Register Fixture services
+            services.AddScoped<IFixtureService, FixtureService>();
+
             return services;
         }
 
@@ -84,6 +87,9 @@ namespace Leaguelane.Api.Configurations
 
             //Register job configuration repositories
             services.AddScoped<IJobConfigurationRepository, JobConfigurationRepository>();
+
+            //Register Fixture repositories
+            services.AddScoped<IFixtureRepository, FixtureRepository>();
 
             return services;
         }

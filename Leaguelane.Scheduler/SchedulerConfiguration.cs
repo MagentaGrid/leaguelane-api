@@ -44,6 +44,15 @@ namespace Leaguelane.Scheduler
                                     //.WithIntervalInHours(24)
                                     .RepeatForever()));
 
+                q.AddJob<FixtureScheduler>(JobKey.Create(nameof(FixtureScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(FixtureScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    .WithIntervalInMinutes(2)
+                                    //.WithIntervalInHours(24)
+                                    .RepeatForever()));
+
             });
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
