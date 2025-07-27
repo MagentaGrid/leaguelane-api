@@ -17,6 +17,7 @@ namespace Leaguelane.Persistence.Entities
         public string? Type { get; set; }
         public string? LogoUrl { get; set; }
         public int? CountryId { get; set; }
+        public string? CountryCode { get; set; }
         public int? SportId { get; set; }
 
         [ForeignKey("CountryId")]
