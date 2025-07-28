@@ -113,6 +113,38 @@ namespace Leaguelane.Persistence.Migrations
                     b.ToTable("Audits");
                 });
 
+            modelBuilder.Entity("Leaguelane.Persistence.Entities.Bookmaker", b =>
+                {
+                    b.Property<int>("BookmakerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookmakerId"));
+
+                    b.Property<bool?>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Updated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.HasKey("BookmakerId");
+
+                    b.ToTable("Bookmakers");
+                });
+
             modelBuilder.Entity("Leaguelane.Persistence.Entities.Contact", b =>
                 {
                     b.Property<int>("Id")

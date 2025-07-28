@@ -20,4 +20,6 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<Audit> Audits => Set<Audit>();
     public DbSet<JobConfiguration> JobConfigurations => Set<JobConfiguration>();
     public DbSet<Fixture> Fixtures => Set<Fixture>();
+    public DbSet<Bookmaker> Bookmakers => Set<Bookmaker>();
+    public DbSet<Bet> Bets => Set<Bet>();
 }
