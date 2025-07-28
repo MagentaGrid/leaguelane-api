@@ -51,7 +51,7 @@ public class Worker(
         await SeedUserDataAsync(dbContext, cancellationToken);
         await SeedContactDataAsync(dbContext, cancellationToken);
         await SeedAboutDataAsync(dbContext, cancellationToken);
-
+        await SeedSportsDataAsync(dbContext, cancellationToken);
     }
       
     public static async Task SeedUserDataAsync(LeaguelaneDbContext dbContext, CancellationToken cancellationToken)
@@ -139,6 +139,36 @@ public class Worker(
                 // Seed the database
                 await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
                 await dbContext.Abouts.AddAsync(about, cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+            });
+        }
+    }
+
+    public static async Task SeedSportsDataAsync(LeaguelaneDbContext dbContext, CancellationToken cancellationToken)
+    {
+        var sportIds = new List<int> { 1 };
+        var exisistingSports = dbContext.Sports.Where(r => sportIds.Contains(r.SportId)).FirstOrDefault();
+        if (exisistingSports == null)
+        {
+            Sport sport = new()
+            {
+                //UserId = 1,
+                Name = "Football",
+                Description = "Football is a team sport played between two teams of eleven players with a spherical ball.",
+                Created = DateTime.UtcNow,
+                Active = true,
+                ApiHost = "https://api.example.com",
+                ApiUrl = "https://api.example.com/sports/1",
+                ApiKey = "your_api_key"
+            };
+
+            var strategy = dbContext.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                // Seed the database
+                await using var transaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+                await dbContext.Sports.AddAsync(sport, cancellationToken);
                 await dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
             });
