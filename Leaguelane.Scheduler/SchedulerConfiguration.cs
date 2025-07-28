@@ -53,6 +53,24 @@ namespace Leaguelane.Scheduler
                                     //.WithIntervalInHours(24)
                                     .RepeatForever()));
 
+                q.AddJob<BookmakerScheduler>(JobKey.Create(nameof(BookmakerScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(BookmakerScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
+                                    .RepeatForever()));
+
+                q.AddJob<BetScheduler>(JobKey.Create(nameof(BetScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(BetScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
+                                    .RepeatForever()));
+
             });
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
