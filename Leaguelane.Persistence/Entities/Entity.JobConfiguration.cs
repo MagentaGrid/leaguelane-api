@@ -9,22 +9,18 @@ using System.Threading.Tasks;
 
 namespace Leaguelane.Persistence.Entities
 {
-    public class Audit: Entity
+    public class JobConfiguration : Entity
     {
         [Key]
-        public int AuditId { get; set; }
-
         public Jobs JobId { get; set; }
-
         public string JobName { get; set; }
-
-        public string Status { get; set; }
-
-        public string? Message { get; set; }
-
+        public string JobType { get; set; }
+        public string? JobParameter { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public int SportId { get; set; }
 
         [ForeignKey("SportId")]
-        public virtual Sport Sport { get; set; }
+        public Sport Sport { get; set; }
     }
 }

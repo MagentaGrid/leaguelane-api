@@ -46,6 +46,12 @@ namespace Leaguelane.Api.Configurations
             //Register Audit services
             services.AddScoped<IAuditService, AuditService>();
 
+            //Register job configuration services
+            services.AddScoped<IJobConfigurationService, JobConfigurationService>();
+
+            //Register Fixture services
+            services.AddScoped<IFixtureService, FixtureService>();
+
             return services;
         }
 
@@ -54,7 +60,7 @@ namespace Leaguelane.Api.Configurations
             //Register user repositories
             services.AddScoped<IUserRepository, UserRepository>();
 
-           
+
             //Contact us repositories
             services.AddScoped<IContactRepository, ContactRepository>();
 
@@ -78,6 +84,12 @@ namespace Leaguelane.Api.Configurations
 
             //Register Audit repositories
             services.AddScoped<IAuditRepository, AuditRepository>();
+
+            //Register job configuration repositories
+            services.AddScoped<IJobConfigurationRepository, JobConfigurationRepository>();
+
+            //Register Fixture repositories
+            services.AddScoped<IFixtureRepository, FixtureRepository>();
 
             return services;
         }

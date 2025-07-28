@@ -26,7 +26,8 @@ namespace Leaguelane.Repository.Repositories
                 Status = "Started",
                 Message = message,
                 Active=true,
-                Created = DateTime.UtcNow
+                Created = DateTime.UtcNow,
+                SportId = 1
             };
 
             await _context.Audits.AddAsync(audit);

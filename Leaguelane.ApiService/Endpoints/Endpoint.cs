@@ -11,7 +11,8 @@ namespace Leaguelane.ApiService.Endpoints
             app.MapGroup("/contacts").AddContactRoutes().WithTags("Contact").WithName("Contact");
             app.MapGroup("/about").AddAboutRoutes().WithTags("About").WithName("About");
             app.MapGroup("/sports").AddSportRoutes().WithTags("Sport").WithName("Sport");
-            app.MapGroup("/schedule").AddSchedulerRoutes().WithTags("Schedule").WithName("Schedule");
+            app.MapGroup("/jobs").AddJobRoutes().WithTags("Job").WithName("Job");
+            app.MapGroup("/job-configuration").AddJobConfigurationRoutes().WithTags("Job-Configuration");
         }
     }
 }

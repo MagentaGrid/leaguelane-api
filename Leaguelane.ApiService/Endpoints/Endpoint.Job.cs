@@ -3,13 +3,13 @@ using MediatR;
 
 namespace Leaguelane.ApiService.Endpoints
 {
-    public static class Endpoint
+    public static class JobEndpoint
     {
-        public static RouteGroupBuilder AddSchedulerRoutes(this RouteGroupBuilder group)
+        public static RouteGroupBuilder AddJobRoutes(this RouteGroupBuilder group)
         {
-            group.MapGet("season", ScheduleSeason).WithName("schedule-season");
-            group.MapGet("country", ScheduleCountry).WithName("schedule-country");
-            group.MapGet("league", ScheduleLeague).WithName("schedule-league");
+            group.MapGet("season", ScheduleSeason).WithName("job-season");
+            group.MapGet("country", ScheduleCountry).WithName("job-country");
+            group.MapGet("league", ScheduleLeague).WithName("job-league");
             return group;
         }
 

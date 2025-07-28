@@ -51,17 +51,22 @@ namespace Leaguelane.Service.Services
                     responseBody,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                var leagues = data.Response.Select(l => new League
+                if (data != null && data.Response != null && data.Response.Count > 0)
                 {
-                    Name = l.League.Name,
-                    Active = true,
-                    Created = DateTime.UtcNow,
-                    LogoUrl = l.League.Logo,
-                    ApiLeagueId = l.League.Id,
-                    Type = l.League.Type,
-                }).ToList();
+                    var leagues = data.Response.Select(l => new League
+                    {
+                        Name = l.League.Name,
+                        Active = true,
+                        Created = DateTime.UtcNow,
+                        LogoUrl = l.League.Logo,
+                        ApiLeagueId = l.League.Id,
+                        Type = l.League.Type,
+                        CurrentSeason = l.Seasons.Where(s => s.Current == true).Select(s => s.Year).FirstOrDefault(),
+                        CountryCode = l.Country.Code,
+                    }).ToList();
 
-                await _leagueRepository.AddLeagues(leagues, cancellationToken);
+                    await _leagueRepository.AddLeagues(leagues, cancellationToken);
+                }
 
                 return true;
             }

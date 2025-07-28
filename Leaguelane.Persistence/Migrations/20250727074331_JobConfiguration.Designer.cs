@@ -4,6 +4,7 @@ using Leaguelane.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Leaguelane.Persistence.Migrations
 {
     [DbContext(typeof(LeaguelaneDbContext))]
-    partial class LeaguelaneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250727074331_JobConfiguration")]
+    partial class JobConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,74 +202,6 @@ namespace Leaguelane.Persistence.Migrations
                     b.ToTable("Countries");
                 });
 
-            modelBuilder.Entity("Leaguelane.Persistence.Entities.Fixture", b =>
-                {
-                    b.Property<int>("FixtureId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FixtureId"));
-
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("AwayTeamId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("GoalsAway")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("GoalsHome")
-                        .HasColumnType("int");
-
-                    b.Property<int>("HomeTeamId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LeagueId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RoundId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SeasonId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("SportId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("Time")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Timezone")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VenueId")
-                        .HasColumnType("int");
-
-                    b.HasKey("FixtureId");
-
-                    b.ToTable("Fixtures");
-                });
-
             modelBuilder.Entity("Leaguelane.Persistence.Entities.JobConfiguration", b =>
                 {
                     b.Property<int>("JobId")
@@ -338,9 +273,6 @@ namespace Leaguelane.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CurrentSeason")
                         .HasColumnType("int");
 
                     b.Property<string>("LogoUrl")
