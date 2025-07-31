@@ -14,9 +14,8 @@ namespace Leaguelane.Enums.Enums
         Fixture = 4,
         Round = 5,
         Bookmaker = 6,
-        Bet = 7
-        Round = 5, // Added Round for RoundsScheduler
-        Team = 6, // Added Team for TeamsScheduler
-        TeamStat = 7 // Added TeamStat for TeamStatsScheduler
+        Bet = 7,
+        Team = 8, 
+        TeamStat = 9
     }
 }
