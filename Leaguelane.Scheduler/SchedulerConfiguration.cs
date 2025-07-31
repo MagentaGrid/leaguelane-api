@@ -53,6 +53,33 @@ namespace Leaguelane.Scheduler
                                     //.WithIntervalInHours(24)
                                     .RepeatForever()));
 
+                q.AddJob<RoundsScheduler>(JobKey.Create(nameof(RoundsScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(RoundsScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    .WithIntervalInMinutes(2)
+                                    //.WithIntervalInHours(24)
+                                    .RepeatForever()));
+
+                q.AddJob<TeamsScheduler>(JobKey.Create(nameof(TeamsScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(TeamsScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    .WithIntervalInMinutes(2)
+                                    //.WithIntervalInHours(24)
+                                    .RepeatForever()));
+
+                q.AddJob<TeamStatsScheduler>(JobKey.Create(nameof(TeamStatsScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(TeamStatsScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    .WithIntervalInMinutes(2)
+                                    //.WithIntervalInHours(24)
+                                    .RepeatForever()));
+
             });
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
