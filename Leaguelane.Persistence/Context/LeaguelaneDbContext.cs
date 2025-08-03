@@ -22,4 +22,10 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<Fixture> Fixtures => Set<Fixture>();
     public DbSet<Bookmaker> Bookmakers => Set<Bookmaker>();
     public DbSet<Bet> Bets => Set<Bet>();
+    public DbSet<Round> Rounds => Set<Round>();
+    public DbSet<Team> Teams => Set<Team>();
+    public DbSet<Venue> Venues => Set<Venue>();
+    public DbSet<TeamStat> TeamStats => Set<TeamStat>();
+    public DbSet<TeamStatFixture> TeamStatFixtures => Set<TeamStatFixture>();
+    public DbSet<TeamStatGoal> TeamStatGoals => Set<TeamStatGoal>();
 }

@@ -4,6 +4,7 @@ using Leaguelane.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Leaguelane.Persistence.Migrations
 {
     [DbContext(typeof(LeaguelaneDbContext))]
-    partial class LeaguelaneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250731175432_TeamsAndStats")]
+    partial class TeamsAndStats
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,84 +114,6 @@ namespace Leaguelane.Persistence.Migrations
                     b.HasIndex("SportId");
 
                     b.ToTable("Audits");
-                });
-
-            modelBuilder.Entity("Leaguelane.Persistence.Entities.Bet", b =>
-                {
-                    b.Property<int>("BetId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BetId"));
-
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FixtureDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("FixtureId")
-                        .HasColumnType("int");
-
-                    b.Property<long>("FixtureTimestamp")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("LeagueId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Season")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Update")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
-
-                    b.HasKey("BetId");
-
-                    b.ToTable("Bets");
-                });
-
-            modelBuilder.Entity("Leaguelane.Persistence.Entities.Bookmaker", b =>
-                {
-                    b.Property<int>("BookmakerId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookmakerId"));
-
-                    b.Property<bool?>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("CreatedBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("Updated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UpdatedBy")
-                        .HasColumnType("int");
-
-                    b.HasKey("BookmakerId");
-
-                    b.ToTable("Bookmakers");
                 });
 
             modelBuilder.Entity("Leaguelane.Persistence.Entities.Contact", b =>
