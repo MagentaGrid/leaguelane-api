@@ -28,4 +28,6 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<TeamStat> TeamStats => Set<TeamStat>();
     public DbSet<TeamStatFixture> TeamStatFixtures => Set<TeamStatFixture>();
     public DbSet<TeamStatGoal> TeamStatGoals => Set<TeamStatGoal>();
+    public DbSet<Odd> Odds => Set<Odd>();
+    public DbSet<OddsValue> OddsValues => Set<OddsValue>();
 }

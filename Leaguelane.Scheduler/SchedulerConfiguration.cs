@@ -98,6 +98,14 @@ namespace Leaguelane.Scheduler
                                     //.WithIntervalInHours(24)
                                     .RepeatForever()));
 
+                q.AddJob<OddsScheduler>(JobKey.Create(nameof(OddsScheduler)))
+                    .AddTrigger(tgr =>
+                            tgr
+                                .ForJob(JobKey.Create(nameof(OddsScheduler)))
+                                .WithSimpleSchedule(s => s
+                                    .WithIntervalInMinutes(2)
+                                    //.WithIntervalInHours(24)
+                                    .RepeatForever()));
             });
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
