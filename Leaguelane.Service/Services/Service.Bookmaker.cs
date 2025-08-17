@@ -1,11 +1,12 @@
 using Leaguelane.Models.Dtos;
+using Leaguelane.Persistence.Entities;
 using Leaguelane.Repository.Repositories;
 using Microsoft.Extensions.Configuration;
-using System;
 using System.Collections.Generic;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Text.Json;
 
 namespace Leaguelane.Service.Services
 {
@@ -27,7 +28,55 @@ namespace Leaguelane.Service.Services
             _apiKey = configuration["FootballApi:ApiKey"];
         }
 
-        public async Task<bool> GetAllBookmakersAsync(CancellationToken cancellationToken)
+        public async Task<List<BookmakerDto>> GetActiveBookmakersAsync(CancellationToken cancellationToken)
+        {
+            var entities = await _bookmakerRepository.GetActiveBookmakersAsync(cancellationToken);
+            return entities.Select(MapToDto).ToList();
+        }
+
+        public async Task<List<BookmakerDto>> GetAllBookmakersAsync(CancellationToken cancellationToken)
+        {
+            var entities = await _bookmakerRepository.GetAllBookmakersAsync(cancellationToken);
+            return entities.Select(MapToDto).ToList();
+        }
+
+        public async Task<BookmakerDto?> GetBookmakerByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            var entity = await _bookmakerRepository.GetBookmakerByIdAsync(id, cancellationToken);
+            return entity == null ? null : MapToDto(entity);
+        }
+
+        public async Task<BookmakerDto> CreateBookmakerAsync(BookmakerDto bookmaker, CancellationToken cancellationToken)
+        {
+            var entity = MapToEntity(bookmaker);
+            var created = await _bookmakerRepository.CreateBookmakerAsync(entity, cancellationToken);
+            return MapToDto(created);
+        }
+
+        public async Task<BookmakerDto> UpdateBookmakerAsync(BookmakerDto bookmaker, CancellationToken cancellationToken)
+        {
+            var entity = MapToEntity(bookmaker);
+            var updated = await _bookmakerRepository.UpdateBookmakerAsync(entity, cancellationToken);
+            return MapToDto(updated);
+        }
+
+        public async Task SoftDeleteBookmakerAsync(int id, CancellationToken cancellationToken)
+        {
+            await _bookmakerRepository.SoftDeleteBookmakerAsync(id, cancellationToken);
+        }
+
+        public async Task RestoreBookmakerAsync(int id, CancellationToken cancellationToken)
+        {
+            await _bookmakerRepository.RestoreBookmakerAsync(id, cancellationToken);
+        }
+
+        public async Task<List<BookmakerDto>> GetDeletedBookmakersAsync(CancellationToken cancellationToken)
+        {
+            var entities = await _bookmakerRepository.GetDeletedBookmakersAsync(cancellationToken);
+            return entities.Select(MapToDto).ToList();
+        }
+
+        public async Task<bool> ImportBookmakersFromApiAsync(CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage
             {
@@ -58,6 +107,32 @@ namespace Leaguelane.Service.Services
             {
                 return false;
             }
+        }
+
+        private BookmakerDto MapToDto(Bookmaker entity)
+        {
+            return new BookmakerDto
+            {
+                Id = entity.BookmakerId,
+                ApiBookMakerId = entity.ApiBookMakerId,
+                Name = entity.Name,
+                AffiliateLink = entity.AffiliateLink,
+                BookieLogo = entity.BookieLogo,
+                Active = entity.Active
+            };
+        }
+
+        private Bookmaker MapToEntity(BookmakerDto dto)
+        {
+            return new Bookmaker
+            {
+                BookmakerId = dto.Id,
+                ApiBookMakerId = dto.ApiBookMakerId,
+                Name = dto.Name,
+                AffiliateLink = dto.AffiliateLink,
+                BookieLogo = dto.BookieLogo,
+                Active = dto.Active
+            };
         }
     }
 }
