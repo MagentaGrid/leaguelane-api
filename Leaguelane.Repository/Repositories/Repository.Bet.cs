@@ -20,9 +20,9 @@ namespace Leaguelane.Repository.Repositories
 
         public async Task<List<Bet>> AddBets(List<Bet> bets, CancellationToken cancellationToken)
         {
-            var fixtureIds = bets.Select(b => b.FixtureId).ToList();
-            var existingBets = await _context.Bets.Where(x => fixtureIds.Contains(x.FixtureId)).ToListAsync(cancellationToken);
-            var newBets = bets.Where(b => !existingBets.Any(e => e.FixtureId == b.FixtureId)).ToList();
+            var betIds = bets.Select(b => b.BetId).ToList();
+            var existingBets = await _context.Bets.Where(x => betIds.Contains(x.BetId)).ToListAsync(cancellationToken);
+            var newBets = bets.Where(b => !existingBets.Any(e => e.BetId == b.BetId)).ToList();
             await _context.Bets.AddRangeAsync(newBets, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             return newBets;

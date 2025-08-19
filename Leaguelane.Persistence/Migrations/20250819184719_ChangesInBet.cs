@@ -5,14 +5,14 @@
 namespace Leaguelane.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class FixtureUpdate : Migration
+    public partial class ChangesInBet : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Status",
-                table: "Fixtures",
+                name: "Name",
+                table: "Bets",
                 type: "nvarchar(max)",
                 nullable: true,
                 oldClrType: typeof(string),
@@ -23,8 +23,8 @@ namespace Leaguelane.Persistence.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Status",
-                table: "Fixtures",
+                name: "Name",
+                table: "Bets",
                 type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "",

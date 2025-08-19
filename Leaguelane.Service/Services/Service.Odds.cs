@@ -1,6 +1,5 @@
 using Leaguelane.Models.Dtos;
 using Leaguelane.Persistence.Entities;
-using Leaguelane.Persistence.Migrations;
 using Leaguelane.Repository.Repositories;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;

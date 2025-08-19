@@ -51,12 +51,8 @@ namespace Leaguelane.Service.Services
                     {
                         var bets = data.Response.Select(b => new Leaguelane.Persistence.Entities.Bet
                         {
-                            LeagueId = b.League.Id,
-                            Season = b.League.Season,
-                            FixtureId = b.Fixture.Id,
-                            FixtureDate = b.Fixture.Date,
-                            FixtureTimestamp = b.Fixture.Timestamp,
-                            Update = b.Update,
+                            BetId = b.Id,
+                            Name = b.Name,
                             Active = true,
                             Created = DateTime.UtcNow
                         }).ToList();

@@ -115,14 +115,17 @@ namespace Leaguelane.Persistence.Migrations
 
             modelBuilder.Entity("Leaguelane.Persistence.Entities.Bet", b =>
                 {
-                    b.Property<int>("BetId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BetId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool?>("Active")
                         .HasColumnType("bit");
+
+                    b.Property<int>("BetId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("Created")
                         .HasColumnType("datetime2");
@@ -130,23 +133,8 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FixtureDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("FixtureId")
-                        .HasColumnType("int");
-
-                    b.Property<long>("FixtureTimestamp")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("LeagueId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Season")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Update")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("Updated")
                         .HasColumnType("datetime2");
@@ -154,7 +142,7 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<int?>("UpdatedBy")
                         .HasColumnType("int");
 
-                    b.HasKey("BetId");
+                    b.HasKey("Id");
 
                     b.ToTable("Bets");
                 });
