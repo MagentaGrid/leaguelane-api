@@ -14,13 +14,13 @@ var cache = builder.AddRedis("cache");
 
 // ? Add the DB migration project
 var LeaguelaneMigration = builder.AddProject<Projects.Leaguelane_Migration>("Leaguelanemigration")
-    .WaitFor(sql)
+    .WaitForCompletion(sql)
     .WithReference(sql);
 
 // ? Add the API service, wait for DB + migration
 var apiService = builder.AddProject<Projects.Leaguelane_ApiService>("apiservice")
     .WithReference(sql)
-    .WaitFor(LeaguelaneMigration);
+    .WaitForCompletion(LeaguelaneMigration);
 
 // ? Add Next.js frontend via Dockerfile
 var frontend = builder.AddDockerfile("web-app", "../web-app")

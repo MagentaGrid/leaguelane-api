@@ -55,6 +55,21 @@ namespace Leaguelane.Api.Configurations
             //Register Odds services
             services.AddScoped<IOddsService, OddsService>();
 
+            //Register team services
+            services.AddScoped<ITeamService, TeamService>();
+
+            //Register team stats services
+            services.AddScoped<ITeamStatService, TeamStatService>();
+
+            //Register round services
+            services.AddScoped<IRoundService, RoundService>();
+
+            //Register bookmaker services
+            services.AddScoped<IBookmakerService, BookmakerService>();
+
+            //Register bet services
+            services.AddScoped<IBetService, BetService>();
+
             return services;
         }
 
@@ -96,6 +111,24 @@ namespace Leaguelane.Api.Configurations
 
             //Register Odds repositories
             services.AddScoped<IOddsRepository, OddsRepository>();
+
+            //Register team repositories
+            services.AddScoped<ITeamRepository, TeamRepository>();
+
+            //Register team stats repositories
+            services.AddScoped<ITeamStatRepository, TeamStatRepository>();
+
+            //Register venue repositories
+            services.AddScoped<IVenueRepository, VenueRepository>();
+
+            //Register round repositories
+            services.AddScoped<IRoundRepository, RoundRepository>();
+
+            //Register bookmaker repositories
+            services.AddScoped<IBookmakerRepository, BookmakerRepository>();
+
+            //Register bet repositories
+            services.AddScoped<IBetRepository, BetRepository>();
 
             return services;
         }

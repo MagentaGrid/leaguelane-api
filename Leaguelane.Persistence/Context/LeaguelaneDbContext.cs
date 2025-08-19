@@ -20,8 +20,6 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<Audit> Audits => Set<Audit>();
     public DbSet<JobConfiguration> JobConfigurations => Set<JobConfiguration>();
     public DbSet<Fixture> Fixtures => Set<Fixture>();
-    public DbSet<Bookmaker> Bookmakers => Set<Bookmaker>();
-    public DbSet<Bet> Bets => Set<Bet>();
     public DbSet<Round> Rounds => Set<Round>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<Venue> Venues => Set<Venue>();
@@ -30,4 +28,6 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<TeamStatGoal> TeamStatGoals => Set<TeamStatGoal>();
     public DbSet<Odd> Odds => Set<Odd>();
     public DbSet<OddsValue> OddsValues => Set<OddsValue>();
+    public DbSet<Bookmaker> Bookmakers => Set<Bookmaker>();
+    public DbSet<Bet> Bets => Set<Bet>();
 }
