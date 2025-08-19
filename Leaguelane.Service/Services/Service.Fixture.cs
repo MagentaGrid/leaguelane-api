@@ -104,5 +104,43 @@ namespace Leaguelane.Service.Services
                 throw;
             }
         }
+
+        public async Task<List<Fixture>> GetAllFixturesAsync(CancellationToken cancellationToken)
+        {
+            return await _fixtureRepository.GetAllFixturesAsync(cancellationToken);
+        }
+
+        public async Task<Fixture> GetFixtureByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            return await _fixtureRepository.GetFixtureByIdAsync(id, cancellationToken);
+        }
+
+        public async Task UpdateFixtureAsync(Fixture fixture, CancellationToken cancellationToken)
+        {
+            await _fixtureRepository.UpdateFixtureAsync(fixture, cancellationToken);
+        }
+
+        public async Task SoftDeleteFixtureAsync(int id, CancellationToken cancellationToken)
+        {
+            await _fixtureRepository.SoftDeleteFixtureAsync(id, cancellationToken);
+        }
+
+        public async Task SetRankAsync(int fixtureId, int rank, CancellationToken cancellationToken)
+        {
+            await _fixtureRepository.SetRankAsync(fixtureId, rank, cancellationToken);
+        }
+
+        public async Task<List<FixtureListItemDto>> GetLatestFixturesAsync(int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var fixtures = await _fixtureRepository.GetLatestFixturesAsync(page, pageSize, cancellationToken);
+            return fixtures.Select(f => new FixtureListItemDto
+            {
+                FixtureId = f.FixtureId,
+                HomeTeam = new FixtureTeamDto { TeamId = f.HomeTeamId, Name = "", Logo = "" }, // Fill with actual data if available
+                AwayTeam = new FixtureTeamDto { TeamId = f.AwayTeamId, Name = "", Logo = "" },
+                Date = f.Date.ToString("dddd"),
+                Time = f.Date.ToString("HH:mm")
+            }).ToList();
+        }
     }
 }

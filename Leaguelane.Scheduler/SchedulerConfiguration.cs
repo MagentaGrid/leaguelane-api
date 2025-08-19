@@ -31,8 +31,8 @@ namespace Leaguelane.Scheduler
                             tgr
                                 .ForJob(JobKey.Create(nameof(LeagueScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    .WithIntervalInMinutes(2)
-                                    //.WithIntervalInHours(24)
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
                                     .RepeatForever()));
 
                 q.AddJob<CountryScheduler>(JobKey.Create(nameof(CountryScheduler)))
@@ -40,8 +40,8 @@ namespace Leaguelane.Scheduler
                             tgr
                                 .ForJob(JobKey.Create(nameof(CountryScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    .WithIntervalInMinutes(2)
-                                    //.WithIntervalInHours(24)
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
                                     .RepeatForever()));
 
                 q.AddJob<FixtureScheduler>(JobKey.Create(nameof(FixtureScheduler)))
@@ -49,8 +49,8 @@ namespace Leaguelane.Scheduler
                             tgr
                                 .ForJob(JobKey.Create(nameof(FixtureScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    .WithIntervalInMinutes(2)
-                                    //.WithIntervalInHours(24)
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
                                     .RepeatForever()));
 
                 q.AddJob<BookmakerScheduler>(JobKey.Create(nameof(BookmakerScheduler)))
@@ -76,8 +76,8 @@ namespace Leaguelane.Scheduler
                             tgr
                                 .ForJob(JobKey.Create(nameof(RoundsScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    .WithIntervalInMinutes(2)
-                                    //.WithIntervalInHours(24)
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
                                     .RepeatForever()));
 
                 q.AddJob<TeamsScheduler>(JobKey.Create(nameof(TeamsScheduler)))
@@ -85,8 +85,8 @@ namespace Leaguelane.Scheduler
                             tgr
                                 .ForJob(JobKey.Create(nameof(TeamsScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    .WithIntervalInMinutes(2)
-                                    //.WithIntervalInHours(24)
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
                                     .RepeatForever()));
 
                 q.AddJob<TeamStatsScheduler>(JobKey.Create(nameof(TeamStatsScheduler)))
@@ -94,8 +94,8 @@ namespace Leaguelane.Scheduler
                             tgr
                                 .ForJob(JobKey.Create(nameof(TeamStatsScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    .WithIntervalInMinutes(2)
-                                    //.WithIntervalInHours(24)
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
                                     .RepeatForever()));
 
                 q.AddJob<OddsScheduler>(JobKey.Create(nameof(OddsScheduler)))
@@ -103,8 +103,8 @@ namespace Leaguelane.Scheduler
                             tgr
                                 .ForJob(JobKey.Create(nameof(OddsScheduler)))
                                 .WithSimpleSchedule(s => s
-                                    .WithIntervalInMinutes(2)
-                                    //.WithIntervalInHours(24)
+                                    //.WithIntervalInMinutes(2)
+                                    .WithIntervalInHours(24)
                                     .RepeatForever()));
             });
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

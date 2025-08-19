@@ -18,13 +18,10 @@ namespace Leaguelane.Scheduler.Scheduler
         }
         public async Task Execute(IJobExecutionContext context)
         {
-            int leagueId = 39; // as per requirement
-            int seasonId = 2019; // as per requirement
-            int sportId = 1; // assuming football
             int auditId = await _auditService.AddAuditAsync(Jobs.Bet, "Odds api scheduler initiated", CancellationToken.None);
             try
             {
-                await _oddsService.FetchAndStoreOddsAsync(leagueId, seasonId, sportId, CancellationToken.None);
+                await _oddsService.FetchOddsAsync(CancellationToken.None);
                 await _auditService.UpdateAuditAsync(auditId, "Completed", "Odds api scheduler completed successfully", CancellationToken.None);
             }
             catch (Exception ex)

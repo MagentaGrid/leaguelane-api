@@ -52,6 +52,9 @@ namespace Leaguelane.Api.Configurations
             //Register Fixture services
             services.AddScoped<IFixtureService, FixtureService>();
 
+            //Register Odds services
+            services.AddScoped<IOddsService, OddsService>();
+
             return services;
         }
 
@@ -90,6 +93,9 @@ namespace Leaguelane.Api.Configurations
 
             //Register Fixture repositories
             services.AddScoped<IFixtureRepository, FixtureRepository>();
+
+            //Register Odds repositories
+            services.AddScoped<IOddsRepository, OddsRepository>();
 
             return services;
         }

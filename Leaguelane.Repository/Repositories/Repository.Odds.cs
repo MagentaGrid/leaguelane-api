@@ -57,5 +57,107 @@ namespace Leaguelane.Repository.Repositories
             }
             await _context.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task<List<Odd>> GetOddsAsync(int? fixtureId, int? bookmakerId, string? market, int skip, int take, bool onlyActive, CancellationToken cancellationToken)
+        {
+            var query = _context.Odds.AsQueryable();
+            if (onlyActive)
+                query = query.Where(o => o.Active == true);
+            if (fixtureId.HasValue)
+                query = query.Where(o => o.FixtureId == fixtureId);
+            if (bookmakerId.HasValue)
+                query = query.Where(o => o.BookmakerId == bookmakerId);
+            // Market filter can be implemented if market is mapped to BetTypeId or similar
+            return await query.Skip(skip).Take(take).ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<Odd>> GetAllOddsAsync(CancellationToken cancellationToken)
+        {
+            return await _context.Odds.ToListAsync(cancellationToken);
+        }
+
+        public async Task<Odd> GetOddsByIdAsync(int id, bool onlyActive, CancellationToken cancellationToken)
+        {
+            var query = _context.Odds.AsQueryable();
+            if (onlyActive)
+                query = query.Where(o => o.Active == true);
+            return await query.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+        }
+
+        public async Task<List<Odd>> GetDeletedOddsAsync(CancellationToken cancellationToken)
+        {
+            return await _context.Odds.Where(o => o.Active == false).ToListAsync(cancellationToken);
+        }
+
+        public async Task UpdateOddsAsync(Odd odd, List<OddsValue> values, CancellationToken cancellationToken)
+        {
+            var existing = await _context.Odds.FirstOrDefaultAsync(o => o.Id == odd.Id, cancellationToken);
+            if (existing != null)
+            {
+                existing.FixtureId = odd.FixtureId;
+                existing.LeagueId = odd.LeagueId;
+                existing.SeasonId = odd.SeasonId;
+                existing.SportId = odd.SportId;
+                existing.BookmakerId = odd.BookmakerId;
+                existing.BetTypeId = odd.BetTypeId;
+                existing.LastUpdated = odd.LastUpdated;
+                existing.Updated = System.DateTime.UtcNow;
+                _context.Odds.Update(existing);
+                await _context.SaveChangesAsync(cancellationToken);
+                // Update values
+                var oddsValues = await _context.OddsValues.Where(v => v.OddsId == odd.Id).ToListAsync(cancellationToken);
+                foreach (var value in values)
+                {
+                    var existingValue = oddsValues.FirstOrDefault(v => v.Label == value.Label);
+                    if (existingValue != null)
+                    {
+                        existingValue.Odd = value.Odd;
+                        existingValue.Updated = System.DateTime.UtcNow;
+                        _context.OddsValues.Update(existingValue);
+                    }
+                    else
+                    {
+                        await _context.OddsValues.AddAsync(new OddsValue
+                        {
+                            OddsId = odd.Id,
+                            Label = value.Label,
+                            Odd = value.Odd,
+                            Created = System.DateTime.UtcNow,
+                            Active = true
+                        }, cancellationToken);
+                    }
+                }
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        public async Task SoftDeleteOddsAsync(int id, CancellationToken cancellationToken)
+        {
+            var odd = await _context.Odds.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+            if (odd != null)
+            {
+                odd.Active = false;
+                odd.Updated = System.DateTime.UtcNow;
+                _context.Odds.Update(odd);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        public async Task RestoreOddsAsync(int id, CancellationToken cancellationToken)
+        {
+            var odd = await _context.Odds.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+            if (odd != null)
+            {
+                odd.Active = true;
+                odd.Updated = System.DateTime.UtcNow;
+                _context.Odds.Update(odd);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        public async Task<List<OddsValue>> GetOddsValuesAsync(int oddsId, CancellationToken cancellationToken)
+        {
+            return await _context.OddsValues.Where(v => v.OddsId == oddsId && v.Active == true).ToListAsync(cancellationToken);
+        }
     }
 }
