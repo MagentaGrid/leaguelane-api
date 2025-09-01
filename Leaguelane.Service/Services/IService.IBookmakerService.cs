@@ -15,5 +15,6 @@ namespace Leaguelane.Service.Services
         Task SoftDeleteBookmakerAsync(int id, CancellationToken cancellationToken);
         Task RestoreBookmakerAsync(int id, CancellationToken cancellationToken);
         Task<List<BookmakerDto>> GetDeletedBookmakersAsync(CancellationToken cancellationToken);
+        Task<bool> ImportBookmakersFromApiAsync(CancellationToken cancellationToken);
     }
 }

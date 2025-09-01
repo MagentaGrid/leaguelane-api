@@ -18,7 +18,7 @@ namespace Leaguelane.Scheduler.Scheduler
         }
         public async Task Execute(IJobExecutionContext context)
         {
-            int auditId = await _auditService.AddAuditAsync(Jobs.Bet, "Odds api scheduler initiated", CancellationToken.None);
+            int auditId = await _auditService.AddAuditAsync(Jobs.Odds, "Odds api scheduler initiated", CancellationToken.None);
             try
             {
                 await _oddsService.FetchOddsAsync(CancellationToken.None);

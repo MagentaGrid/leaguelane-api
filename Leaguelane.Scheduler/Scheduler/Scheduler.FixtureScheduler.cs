@@ -15,7 +15,7 @@ namespace Leaguelane.Scheduler.Scheduler
         }
         public async Task Execute(IJobExecutionContext context)
         {
-            int auditId = await _auditService.AddAuditAsync(Jobs.Country, "Fixture api scheduler initiated", CancellationToken.None);
+            int auditId = await _auditService.AddAuditAsync(Jobs.Fixture, "Fixture api scheduler initiated", CancellationToken.None);
             try
             {
                 await _fixtureService.GetAllFixtures(CancellationToken.None);
