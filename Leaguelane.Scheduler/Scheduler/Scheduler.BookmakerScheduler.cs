@@ -20,7 +20,7 @@ namespace Leaguelane.Scheduler.Scheduler
             int auditId = await _auditService.AddAuditAsync(Jobs.Bookmaker, "Bookmaker api scheduler initiated", CancellationToken.None);
             try
             {
-                await _bookmakerService.GetAllBookmakersAsync(CancellationToken.None);
+                await _bookmakerService.ImportBookmakersFromApiAsync(CancellationToken.None);
                 await _auditService.UpdateAuditAsync(auditId, "Completed", "Bookmaker api scheduler completed successfully", CancellationToken.None);
             }
             catch (Exception ex)

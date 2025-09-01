@@ -16,6 +16,7 @@ namespace Leaguelane.Enums.Enums
         Bookmaker = 6,
         Bet = 7,
         Team = 8, 
-        TeamStat = 9
+        TeamStat = 9,
+        Odds = 10
     }
 }
