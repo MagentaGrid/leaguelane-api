@@ -1,112 +1,53 @@
 ﻿using Leaguelane.Scheduler.Scheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Quartz.Listener;
 
 namespace Leaguelane.Scheduler
 {
     public static class SchedulerConfiguration
     {
-        public static void  AddScheduler(this IServiceCollection services)
+        public static void AddScheduler(this IServiceCollection services)
         {
             services.AddQuartz(q =>
             {
                 q.UseMicrosoftDependencyInjectionJobFactory();
 
-                q.AddJob<SeasonsScheduler>(JobKey.Create(nameof(SeasonsScheduler)))
-                    .AddTrigger(tgr => 
-                            tgr
-                                .ForJob(JobKey.Create(nameof(SeasonsScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
+                // Register all jobs
+                q.AddJob<CountryScheduler>(JobKey.Create(nameof(CountryScheduler)));
+                q.AddJob<LeagueScheduler>(JobKey.Create(nameof(LeagueScheduler)));
+                q.AddJob<SeasonsScheduler>(JobKey.Create(nameof(SeasonsScheduler)));
+                q.AddJob<FixtureScheduler>(JobKey.Create(nameof(FixtureScheduler)));
+                q.AddJob<RoundsScheduler>(JobKey.Create(nameof(RoundsScheduler)));
+                q.AddJob<TeamsScheduler>(JobKey.Create(nameof(TeamsScheduler)));
+                q.AddJob<TeamStatsScheduler>(JobKey.Create(nameof(TeamStatsScheduler)));
+                q.AddJob<BetScheduler>(JobKey.Create(nameof(BetScheduler)));
+                q.AddJob<BookmakerScheduler>(JobKey.Create(nameof(BookmakerScheduler)));
+                q.AddJob<OddsScheduler>(JobKey.Create(nameof(OddsScheduler)));
 
-                q.AddJob<LeagueScheduler>(JobKey.Create(nameof(LeagueScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(LeagueScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
+                // Only trigger the FIRST job (Country) daily
+                q.AddTrigger(t => t
+                    .ForJob(JobKey.Create(nameof(CountryScheduler)))
+                    .WithIdentity("CountryTrigger")
+                    .WithSimpleSchedule(s => s.WithIntervalInHours(24).RepeatForever())
+                );
 
-                q.AddJob<CountryScheduler>(JobKey.Create(nameof(CountryScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(CountryScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
+                // Create and configure job chain
+                var chain = new JobChainingJobListener("JobChain");
+                chain.AddJobChainLink(JobKey.Create(nameof(CountryScheduler)), JobKey.Create(nameof(LeagueScheduler)));
+                chain.AddJobChainLink(JobKey.Create(nameof(LeagueScheduler)), JobKey.Create(nameof(SeasonsScheduler)));
+                chain.AddJobChainLink(JobKey.Create(nameof(SeasonsScheduler)), JobKey.Create(nameof(FixtureScheduler)));
+                chain.AddJobChainLink(JobKey.Create(nameof(FixtureScheduler)), JobKey.Create(nameof(RoundsScheduler)));
+                chain.AddJobChainLink(JobKey.Create(nameof(RoundsScheduler)), JobKey.Create(nameof(TeamsScheduler)));
+                chain.AddJobChainLink(JobKey.Create(nameof(TeamsScheduler)), JobKey.Create(nameof(TeamStatsScheduler)));
+                chain.AddJobChainLink(JobKey.Create(nameof(TeamStatsScheduler)), JobKey.Create(nameof(BetScheduler)));
+                chain.AddJobChainLink(JobKey.Create(nameof(BetScheduler)), JobKey.Create(nameof(BookmakerScheduler)));
+                chain.AddJobChainLink(JobKey.Create(nameof(BookmakerScheduler)), JobKey.Create(nameof(OddsScheduler)));
 
-                q.AddJob<FixtureScheduler>(JobKey.Create(nameof(FixtureScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(FixtureScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
-
-                q.AddJob<BookmakerScheduler>(JobKey.Create(nameof(BookmakerScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(BookmakerScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
-
-                q.AddJob<BetScheduler>(JobKey.Create(nameof(BetScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(BetScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
-
-                q.AddJob<RoundsScheduler>(JobKey.Create(nameof(RoundsScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(RoundsScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
-
-                q.AddJob<TeamsScheduler>(JobKey.Create(nameof(TeamsScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(TeamsScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
-
-                q.AddJob<TeamStatsScheduler>(JobKey.Create(nameof(TeamStatsScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(TeamStatsScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
-
-                q.AddJob<OddsScheduler>(JobKey.Create(nameof(OddsScheduler)))
-                    .AddTrigger(tgr =>
-                            tgr
-                                .ForJob(JobKey.Create(nameof(OddsScheduler)))
-                                .WithSimpleSchedule(s => s
-                                    //.WithIntervalInMinutes(2)
-                                    .WithIntervalInHours(24)
-                                    .RepeatForever()));
+                // Attach job listener
+                q.AddJobListener(chain);
             });
+
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
     }
