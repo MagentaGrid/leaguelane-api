@@ -1,26 +1,40 @@
-import { Navigation } from "@/components/navigation"
-import { TopLeagues } from "@/components/top-leagues"
-import { PromotionalCards } from "@/components/promotional-cards"
+import { Navigation } from "@/components/site/home/navigation"
+import { TopLeagues } from "@/components/site/home/top-leagues"
+import { Offers } from "@/components/site/home/offers"
+import { Predictions } from "@/components/site/home/predictions"
+import { BestBets } from "@/components/site/home/best-bets"
+import { Articles } from "@/components/site/home/articles"
+import { Highlights } from "@/components/site/home/highlights"
+import { Footer } from "@/components/site/home/footer"
 
 export default function Home() {
   return (
-    <div className="min-h-screen">
-      <nav className="w-full bg-background border-b border-border">
+    <div className="min-h-screen bg-background">
+      <header className="w-full bg-background">
         <Navigation />
-      </nav>
+      </header>
 
-      <main className="min-h-screen" style={{ backgroundColor: "#F2F2F2" }}>
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex gap-6">
-            <TopLeagues />
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <TopLeagues />
 
-            {/* Main Content Area */}
-            <div className="flex-1">
-              <PromotionalCards />
+          {/* Main Content Area */}
+          <div className="lg:col-span-3 space-y-8">
+            <Offers />
+            <Predictions />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <BestBets />
+              <Articles />
             </div>
+
+            <Highlights />
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   )
 }

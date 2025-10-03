@@ -1,9 +1,9 @@
-# Hotel booking UI
+# Create Navigation Bar
 
 *Automatically synced with your [v0.app](https://v0.app) deployments*
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/vijaisebastian-3927s-projects/v0-hotel-booking-ui)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/gcrSnAHU032)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/vijaisebastian-3927s-projects/v0-create-navigation-bar)
+[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/12A4HVgaWHw)
 
 ## Overview
 
@@ -14,13 +14,13 @@ Any changes you make to your deployed app will be automatically pushed to this r
 
 Your project is live at:
 
-**[https://vercel.com/vijaisebastian-3927s-projects/v0-hotel-booking-ui](https://vercel.com/vijaisebastian-3927s-projects/v0-hotel-booking-ui)**
+**[https://vercel.com/vijaisebastian-3927s-projects/v0-create-navigation-bar](https://vercel.com/vijaisebastian-3927s-projects/v0-create-navigation-bar)**
 
 ## Build your app
 
 Continue building your app on:
 
-**[https://v0.app/chat/projects/gcrSnAHU032](https://v0.app/chat/projects/gcrSnAHU032)**
+**[https://v0.app/chat/projects/12A4HVgaWHw](https://v0.app/chat/projects/12A4HVgaWHw)**
 
 ## How It Works
 
