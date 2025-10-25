@@ -3,7 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Leaguelane.Persistence.Entities
 {
-    public enum TeamStatsResultType { played, wins, draws, losses }
+    // Add 'loses' alias to support API value "loses" which maps to losses
+    public enum TeamStatsResultType { played, wins, draws, losses, loses = losses }
 
     public class TeamStatFixture
     {
@@ -13,8 +14,8 @@ namespace Leaguelane.Persistence.Entities
         public int TeamStatsId { get; set; } // FK to TeamStats(Id)
         [Required]
         public TeamStatsResultType ResultType { get; set; }
-        public int Home { get; set; }
-        public int Away { get; set; }
-        public int Total { get; set; }
+        public int? Home { get; set; }
+        public int? Away { get; set; }
+        public int? Total { get; set; }
     }
 }
