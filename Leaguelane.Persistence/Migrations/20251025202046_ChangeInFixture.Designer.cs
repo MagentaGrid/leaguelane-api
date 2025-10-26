@@ -4,6 +4,7 @@ using Leaguelane.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Leaguelane.Persistence.Migrations
 {
     [DbContext(typeof(LeaguelaneDbContext))]
-    partial class LeaguelaneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251025202046_ChangeInFixture")]
+    partial class ChangeInFixture
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -285,10 +288,7 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<bool?>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ApiFixtureId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("AwayTeamId")
+                    b.Property<int>("AwayTeamId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("Created")
@@ -297,7 +297,7 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("Date")
+                    b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("GoalsAway")
@@ -306,7 +306,7 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<int?>("GoalsHome")
                         .HasColumnType("int");
 
-                    b.Property<int?>("HomeTeamId")
+                    b.Property<int>("HomeTeamId")
                         .HasColumnType("int");
 
                     b.Property<int>("LeagueId")
@@ -327,10 +327,11 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("Time")
+                    b.Property<long>("Time")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Timezone")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("Updated")
@@ -801,10 +802,10 @@ namespace Leaguelane.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("Away")
+                    b.Property<int>("Away")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Home")
+                    b.Property<int>("Home")
                         .HasColumnType("int");
 
                     b.Property<int>("ResultType")
@@ -813,7 +814,7 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<int>("TeamStatsId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Total")
+                    b.Property<int>("Total")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

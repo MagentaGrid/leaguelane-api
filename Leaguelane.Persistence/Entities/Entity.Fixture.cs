@@ -12,13 +12,13 @@ namespace Leaguelane.Persistence.Entities
         [Key]
         public int FixtureId { get; set; }  
 
-        public string Timezone { get; set; }
+        public string? Timezone { get; set; }
 
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
-        public long Time { get; set; }
+        public long? Time { get; set; }
 
-        public int VenueId { get; set; }
+        public int? VenueId { get; set; }
 
         public int LeagueId { get; set; }
 
@@ -30,14 +30,15 @@ namespace Leaguelane.Persistence.Entities
 
         public string? Status { get; set; }
 
-        public int HomeTeamId { get; set; }
+        public int? HomeTeamId { get; set; }
 
-        public int AwayTeamId { get; set; }
+        public int? AwayTeamId { get; set; }
 
         public int? GoalsHome { get; set; }
 
         public int? GoalsAway { get; set; }
 
         public int? Rank { get; set; } // For ranking fixtures
+        public int? ApiFixtureId { get; set; }
     }
 }

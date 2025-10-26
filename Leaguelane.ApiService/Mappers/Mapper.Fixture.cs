@@ -12,8 +12,8 @@ namespace Leaguelane.ApiService.Mappers
                 FixtureId = entity.FixtureId,
                 HomeTeam = new FixtureTeamDto { TeamId = entity.HomeTeamId, Name = "", Logo = "" }, // Fill with actual data if available
                 AwayTeam = new FixtureTeamDto { TeamId = entity.AwayTeamId, Name = "", Logo = "" },
-                Date = entity.Date.ToString("dddd"),
-                Time = entity.Date.ToString("HH:mm")
+                Date = entity.Date.HasValue ? entity.Date.Value.ToString("dddd") : null,
+                Time = entity.Date.HasValue ? entity.Date.Value.ToString("HH:mm") : null
             };
         }
 
@@ -35,7 +35,7 @@ namespace Leaguelane.ApiService.Mappers
                 AwayTeamId = entity.AwayTeamId,
                 GoalsHome = entity.GoalsHome,
                 GoalsAway = entity.GoalsAway,
-                Rank = entity.Rank
+                Rank = entity.Rank,
             };
         }
 
@@ -57,7 +57,8 @@ namespace Leaguelane.ApiService.Mappers
                 AwayTeamId = dto.AwayTeamId,
                 GoalsHome = dto.GoalsHome,
                 GoalsAway = dto.GoalsAway,
-                Rank = dto.Rank
+                Rank = dto.Rank,
+                ApiFixtureId = dto.FixtureId
             };
         }
     }

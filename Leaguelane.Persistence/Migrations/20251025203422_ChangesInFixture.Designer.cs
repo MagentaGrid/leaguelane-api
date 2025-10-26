@@ -4,6 +4,7 @@ using Leaguelane.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Leaguelane.Persistence.Migrations
 {
     [DbContext(typeof(LeaguelaneDbContext))]
-    partial class LeaguelaneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251025203422_ChangesInFixture")]
+    partial class ChangesInFixture
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -801,10 +804,10 @@ namespace Leaguelane.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("Away")
+                    b.Property<int>("Away")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Home")
+                    b.Property<int>("Home")
                         .HasColumnType("int");
 
                     b.Property<int>("ResultType")
@@ -813,7 +816,7 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<int>("TeamStatsId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Total")
+                    b.Property<int>("Total")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

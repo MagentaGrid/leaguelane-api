@@ -33,22 +33,12 @@ namespace Leaguelane.Service.Services
         public async Task GetAllFixtures(CancellationToken cancellationToken)
         {
             var leagues = await _leagueRepository.GetAllActiveLeagues(cancellationToken);
-            var throttler = new SemaphoreSlim(10); 
-            var tasks = leagues.Select(async item =>
-            {
-                await throttler.WaitAsync(cancellationToken);
-                try
-                {
-                    await GetAllFixturesByLeagueAndSeason(item.LeagueId, item.CurrentSeason, cancellationToken);
-                }
-                finally
-                {
-                    throttler.Release();
-                    await Task.Delay(500, cancellationToken); 
-                }
-            }).ToList();
 
-            await Task.WhenAll(tasks);
+            foreach (var item in leagues)
+            {
+                await GetAllFixturesByLeagueAndSeason(item.LeagueId, item.CurrentSeason, cancellationToken);
+                await Task.Delay(500, cancellationToken); // Rate limiting
+            }
         }
         public async Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, CancellationToken cancellationToken)
         {
@@ -68,7 +58,7 @@ namespace Leaguelane.Service.Services
 
                 var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
-                var fixtures = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<FixtureResponseDto>>>(
+                var fixtures = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<FixtureResponseDto?>>>(
                     responseBody,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -138,8 +128,8 @@ namespace Leaguelane.Service.Services
                 FixtureId = f.FixtureId,
                 HomeTeam = new FixtureTeamDto { TeamId = f.HomeTeamId, Name = "", Logo = "" }, // Fill with actual data if available
                 AwayTeam = new FixtureTeamDto { TeamId = f.AwayTeamId, Name = "", Logo = "" },
-                Date = f.Date.ToString("dddd"),
-                Time = f.Date.ToString("HH:mm")
+                Date = f.Date.HasValue ? f.Date.Value.ToString("yyyy-MM-dd") : null,
+                Time =  f.Date.HasValue ? f.Date.Value.ToString("HH:mm") : null
             }).ToList();
         }
     }
