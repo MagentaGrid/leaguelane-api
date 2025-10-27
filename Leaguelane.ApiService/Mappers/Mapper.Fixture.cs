@@ -5,13 +5,15 @@ namespace Leaguelane.ApiService.Mappers
 {
     public static class FixtureMapper
     {
-        public static FixtureListItemDto MapToListItemDto(Fixture entity)
+        public static FixtureListItemDto MapToListItemDto(Fixture entity, Dictionary<int, Persistence.Entities.Team> teamNames)
         {
+            var homeTeam = teamNames.GetValueOrDefault((int)entity.HomeTeamId);
+            var awayTeam = teamNames.GetValueOrDefault((int)entity.AwayTeamId);
             return new FixtureListItemDto
             {
                 FixtureId = entity.FixtureId,
-                HomeTeam = new FixtureTeamDto { TeamId = entity.HomeTeamId, Name = "", Logo = "" }, // Fill with actual data if available
-                AwayTeam = new FixtureTeamDto { TeamId = entity.AwayTeamId, Name = "", Logo = "" },
+                HomeTeam = new FixtureTeamDto { TeamId = entity.HomeTeamId, Name = homeTeam?.Name, Logo = homeTeam?.LogoUrl }, // Fill with actual data if available
+                AwayTeam = new FixtureTeamDto { TeamId = entity.AwayTeamId, Name = awayTeam?.Name, Logo = awayTeam?.LogoUrl }, // Fill with actual data if available
                 Date = entity.Date.HasValue ? entity.Date.Value.ToString("dddd") : null,
                 Time = entity.Date.HasValue ? entity.Date.Value.ToString("HH:mm") : null
             };

@@ -16,5 +16,6 @@ namespace Leaguelane.Repository.Repositories
         Task SetRankAsync(int fixtureId, int rank, CancellationToken cancellationToken);
         Task<List<Fixture>> GetLatestFixturesAsync(int page, int pageSize, CancellationToken cancellationToken);
         Task<List<Fixture>> GetFixturesForNextFourteenDaysAsync(CancellationToken cancellationToken);
+        Task<List<Fixture>> GetAllFixturesWithPaginationAsync(int page, int pageSize, CancellationToken cancellationToken);
     }
 }

@@ -132,5 +132,10 @@ namespace Leaguelane.Service.Services
                 Time =  f.Date.HasValue ? f.Date.Value.ToString("HH:mm") : null
             }).ToList();
         }
+
+        public async Task<List<Fixture>> GetAllFixturesWithPaginationAsync(int page, int pageSize, CancellationToken cancellationToken)
+        {
+            return await _fixtureRepository.GetAllFixturesWithPaginationAsync(page, pageSize, cancellationToken);
+        }
     }
 }

@@ -102,5 +102,10 @@ namespace Leaguelane.Service.Services
                 await _venueRepository.AddOrUpdateVenuesAsync(venues, cancellationToken);
             }
         }
+
+        public async Task<Dictionary<int, PersistenceTeam>> GetAllTeamsById(IEnumerable<int> teamIds, CancellationToken cancellationToken)
+        {
+            return await _teamRepository.GetAllTeamsById(teamIds, cancellationToken);
+        }
     }
 }
