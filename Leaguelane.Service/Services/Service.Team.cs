@@ -19,18 +19,22 @@ namespace Leaguelane.Service.Services
     {
         private readonly ITeamRepository _teamRepository;
         private readonly IVenueRepository _venueRepository;
+        private readonly ILeagueRepository _leagueRepository;
+        private readonly ISeasonRepository _seasonRepository;
         private readonly HttpClient _httpClient = new HttpClient();
         private readonly string _baseUrl;
         private readonly string _apiHost;
         private readonly string _apiKey;
 
-        public TeamService(ITeamRepository teamRepository, IVenueRepository venueRepository, IConfiguration configuration)
+        public TeamService(ITeamRepository teamRepository, IVenueRepository venueRepository, IConfiguration configuration, ISeasonRepository seasonRepository, ILeagueRepository leagueRepository)
         {
             _teamRepository = teamRepository;
             _venueRepository = venueRepository;
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? string.Empty;
             _apiHost = configuration["FootballApi:ApiHost"] ?? string.Empty;
             _apiKey = configuration["FootballApi:ApiKey"] ?? string.Empty;
+            _seasonRepository = seasonRepository;
+            _leagueRepository = leagueRepository;
         }
 
         public async Task FetchAndStoreTeamsAndVenuesAsync(int leagueId, int seasonId, int sportId, CancellationToken cancellationToken)
@@ -50,7 +54,7 @@ namespace Leaguelane.Service.Services
 
             var teams = new List<PersistenceTeam>();
             var venues = new List<PersistenceVenue>();
-            if (apiResponse?.Response != null)
+            if (apiResponse?.Response != null && apiResponse?.Response?.Count > 0)
             {
                 foreach (var item in apiResponse.Response)
                 {
@@ -71,12 +75,12 @@ namespace Leaguelane.Service.Services
                     };
                     teams.Add(team);
 
-                    if (item.Venue != null)
+                    if (item.Venue != null && item?.Venue.Id != null)
                     {
                         venues.Add(new PersistenceVenue
                         {
-                            ApiVenueId = item.Venue.Id,
-                            Name = item.Venue.Name,
+                            ApiVenueId = item.Venue.Id ?? 0,
+                            Name = item.Venue.Name ?? "",
                             Address = item.Venue.Address,
                             City = item.Venue.City,
                             Capacity = item.Venue.Capacity,
@@ -100,6 +104,19 @@ namespace Leaguelane.Service.Services
                         venue.TeamId = team.Id;
                 }
                 await _venueRepository.AddOrUpdateVenuesAsync(venues, cancellationToken);
+            }
+        }
+
+        public async Task ImportAllTeams(CancellationToken cancellationToken)
+        {
+            var leagues = await _leagueRepository.GetAllActiveLeagues(cancellationToken);
+            var seasons = await _seasonRepository.GetAllSeasons(cancellationToken);
+            foreach (var league in leagues)
+            {
+                foreach (var season in seasons)
+                {
+                    await FetchAndStoreTeamsAndVenuesAsync(league.ApiLeagueId, season.Year, 1, cancellationToken);
+                }
             }
         }
     }

@@ -127,7 +127,7 @@ namespace Leaguelane.Service.Services
             return new Bookmaker
             {
                 BookmakerId = dto.Id,
-                ApiBookMakerId = dto.ApiBookMakerId,
+                ApiBookMakerId = (int)dto.ApiBookMakerId,
                 Name = dto.Name,
                 AffiliateLink = dto.AffiliateLink,
                 BookieLogo = dto.BookieLogo,

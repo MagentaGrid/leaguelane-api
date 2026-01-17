@@ -27,11 +27,11 @@ namespace Leaguelane.Repository.Repositories
 
         public async Task AddFixturesBatchAsync(List<Fixture> fixture, CancellationToken cancellationToken)
         {
-            var fixtureIds = fixture.Select(x => x.FixtureId).ToList();
+            var fixtureIds = fixture.Select(x => x.ApiFixtureId).ToList();
 
-            var existingFixtures = await _context.Fixtures.Where(x => fixtureIds.Contains(x.FixtureId)).ToListAsync(cancellationToken);
+            var existingFixtures = await _context.Fixtures.Where(x => fixtureIds.Contains(x.ApiFixtureId)).ToListAsync(cancellationToken);
 
-            var fixturesToBeAdded = fixture.Where(x => !existingFixtures.Any(y => y.FixtureId == x.FixtureId)).ToList();
+            var fixturesToBeAdded = fixture.Where(x => !existingFixtures.Any(y => y.ApiFixtureId == x.FixtureId)).ToList();
 
             await _context.Fixtures.AddRangeAsync(fixturesToBeAdded);
             await _context.SaveChangesAsync(cancellationToken);

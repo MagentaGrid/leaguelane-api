@@ -43,5 +43,10 @@ namespace Leaguelane.Repository.Repositories
 
             return newSeasons;
         }
+
+        public async Task<List<Season>> GetAllSeasons(CancellationToken cancellationToken)
+        {
+            return await _context.Seasons.Where(x => x.Active == true).ToListAsync(cancellationToken);
+        }
     }
 }

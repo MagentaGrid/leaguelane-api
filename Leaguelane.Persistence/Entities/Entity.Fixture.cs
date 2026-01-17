@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Leaguelane.Persistence.Entities
 {
+    [Index(nameof(ApiFixtureId), IsUnique = true)]
     public class Fixture: Entity
     {
         [Key]
@@ -39,6 +41,6 @@ namespace Leaguelane.Persistence.Entities
         public int? GoalsAway { get; set; }
 
         public int? Rank { get; set; } // For ranking fixtures
-        public int? ApiFixtureId { get; set; }
+        public int ApiFixtureId { get; set; }
     }
 }

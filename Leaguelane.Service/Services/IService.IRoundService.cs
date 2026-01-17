@@ -8,5 +8,6 @@ namespace Leaguelane.Service.Services
     public interface IRoundService
     {
         Task FetchAndStoreRoundsAsync(int leagueId, int seasonId, int sportId, CancellationToken cancellationToken);
+        Task ImportAllRounds(CancellationToken cancellationToken);
     }
 }

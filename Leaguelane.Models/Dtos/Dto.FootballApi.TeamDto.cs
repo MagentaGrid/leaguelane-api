@@ -31,18 +31,18 @@ namespace Leaguelane.Models.Dtos
     public class VenueApiDto
     {
         [JsonPropertyName("id")]
-        public int Id { get; set; }
+        public int? Id { get; set; }
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         [JsonPropertyName("address")]
-        public string Address { get; set; }
+        public string? Address { get; set; }
         [JsonPropertyName("city")]
-        public string City { get; set; }
+        public string? City { get; set; }
         [JsonPropertyName("capacity")]
         public int? Capacity { get; set; }
         [JsonPropertyName("surface")]
-        public string Surface { get; set; }
+        public string? Surface { get; set; }
         [JsonPropertyName("image")]
-        public string Image { get; set; }
+        public string? Image { get; set; }
     }
 }

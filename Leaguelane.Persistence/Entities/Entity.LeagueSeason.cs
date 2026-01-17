@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Leaguelane.Persistence.Entities
 {
+    [Index(nameof(ApiLeagueSeasonId), IsUnique = true)]
     public class LeagueSeason
     {
         [Key]
@@ -11,6 +13,7 @@ namespace Leaguelane.Persistence.Entities
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public bool IsCurrent { get; set; }
+        public int ApiLeagueSeasonId { get; set; }
 
         [ForeignKey("LeagueId")]
         public League? League { get; set; }
