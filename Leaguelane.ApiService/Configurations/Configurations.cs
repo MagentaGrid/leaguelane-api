@@ -75,6 +75,9 @@ namespace Leaguelane.Api.Configurations
 
         private static IServiceCollection RegisterRepositories(this IServiceCollection services)
         {
+            //Register Generic repositories
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
             //Register user repositories
             services.AddScoped<IUserRepository, UserRepository>();
 
