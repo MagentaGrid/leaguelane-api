@@ -14,17 +14,21 @@ namespace Leaguelane.Service.Services
     public class RoundService : IRoundService
     {
         private readonly IRoundRepository _roundRepository;
+        private readonly ISeasonRepository _seasonRepository;
+        private readonly ILeagueRepository _leagueRepository;
         private readonly HttpClient _httpClient = new HttpClient();
         private readonly string _baseUrl;
         private readonly string _apiHost;
         private readonly string _apiKey;
 
-        public RoundService(IRoundRepository roundRepository, IConfiguration configuration)
+        public RoundService(IRoundRepository roundRepository, IConfiguration configuration, ISeasonRepository seasonRepository, ILeagueRepository leagueRepository)
         {
             _roundRepository = roundRepository;
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? string.Empty;
             _apiHost = configuration["FootballApi:ApiHost"] ?? string.Empty;
             _apiKey = configuration["FootballApi:ApiKey"] ?? string.Empty;
+            _seasonRepository = seasonRepository;
+            _leagueRepository = leagueRepository;
         }
 
         public async Task FetchAndStoreRoundsAsync(int leagueId, int seasonId, int sportId, CancellationToken cancellationToken)
@@ -47,17 +51,33 @@ namespace Leaguelane.Service.Services
             {
                 foreach (var roundName in apiResponse.Response)
                 {
-                    rounds.Add(new Round
+                    if (!string.IsNullOrEmpty(roundName))
                     {
-                        Name = roundName,
-                        LeagueId = leagueId,
-                        SeasonId = seasonId,
-                        SportId = sportId,
-                        Created = DateTime.UtcNow,
-                        Active = true
-                    });
+                        rounds.Add(new Round
+                        {
+                            Name = roundName,
+                            LeagueId = leagueId,
+                            SeasonId = seasonId,
+                            SportId = sportId,
+                            Created = DateTime.UtcNow,
+                            Active = true
+                        });
+                    }
                 }
                 await _roundRepository.AddOrUpdateRoundsAsync(rounds, cancellationToken);
+            }
+        }
+
+        public async Task ImportAllRounds(CancellationToken cancellationToken)
+        {
+            var leagues = await _leagueRepository.GetAllActiveLeagues(cancellationToken);
+            var seasons = await _seasonRepository.GetAllSeasons(cancellationToken);
+            foreach (var league in leagues)
+            {
+                foreach (var season in seasons)
+                {
+                    await FetchAndStoreRoundsAsync(league.ApiLeagueId, season.Year, 1, cancellationToken);
+                }
             }
         }
     }

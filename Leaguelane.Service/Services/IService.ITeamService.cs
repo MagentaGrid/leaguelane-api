@@ -7,5 +7,6 @@ namespace Leaguelane.Service.Services
     public interface ITeamService
     {
         Task FetchAndStoreTeamsAndVenuesAsync(int leagueId, int seasonId, int sportId, CancellationToken cancellationToken);
+        Task ImportAllTeams(CancellationToken cancellationToken);
     }
 }

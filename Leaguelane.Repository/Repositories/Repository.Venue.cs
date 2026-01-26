@@ -19,7 +19,8 @@ namespace Leaguelane.Repository.Repositories
         {
             var apiVenueIds = venues.Select(v => v.ApiVenueId).ToList();
             var existingVenues = await _context.Venues.Where(v => apiVenueIds.Contains(v.ApiVenueId)).ToListAsync(cancellationToken);
-            foreach (var venue in venues)
+            var uniqueVenues = venues.DistinctBy(x => x.ApiVenueId).ToList();
+            foreach (var venue in uniqueVenues)
             {
                 var existing = existingVenues.FirstOrDefault(v => v.ApiVenueId == venue.ApiVenueId);
                 if (existing == null)
