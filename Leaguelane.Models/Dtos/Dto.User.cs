@@ -41,16 +41,13 @@ namespace Leaguelane.Models.Dtos
         public string Password { get; set; }
     }
 
-    public class LoginResponse
-    {
-        public bool IsSuccess { get; set; }
-        public string? ErrorMessage { get; set; }
-
-        //public User User { get; set; }
-        public string Token { get; set; }
-
-        public long TokenExpired { get; set; }
-    }
+    public record LoginResponse
+    (
+        bool IsSuccess,
+        string? ErrorMessage,
+        LoginReponseDto? User,
+        string? Token
+    );
     public class UserRequest
     {
         public IEnumerable<User> Users { get; set; }
@@ -65,5 +62,13 @@ namespace Leaguelane.Models.Dtos
         public DateTime? Updated { get; set; }
         public int? CreatedBy { get; set; }
         public int? UpdatedBy { get; set; }
+    }
+
+    public class LoginReponseDto
+    {
+        public string UserName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public UserRole Role { get; set; }
     }
 }
