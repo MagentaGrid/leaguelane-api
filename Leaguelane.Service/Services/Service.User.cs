@@ -11,14 +11,16 @@ namespace Leaguelane.Service.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        public UserService(IUserRepository userRepository)
+        private readonly IRepository _repository;
+        public UserService(IUserRepository userRepository, IRepository repository)
         {
             _userRepository = userRepository;
+            _repository = repository;
         }
 
         public async Task<List<User>> GetAllUsers(CancellationToken cancellationToken)
         {
-            return await _userRepository.GetAllUsers(cancellationToken);
+            return (await _repository.GetAllAsync<User>()).ToList();
         }
 
         public async Task<User> GetUserById(int id, CancellationToken cancellationToken)
