@@ -3,6 +3,7 @@ using Leaguelane.ApiService.Endpoints;
 using Leaguelane.Persistence.Context;
 using Azure.Storage.Blobs;
 using Leaguelane.Scheduler;
+using Leaguelane.ApiService.Middlewears;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.MapEndpoints();
 
