@@ -5,7 +5,6 @@
     <ProjectReference Include="..\Leaguelane.Models\Leaguelane.Models.csproj" />
     <ProjectReference Include="..\Leaguelane.Persistence\Leaguelane.Persistence.csproj" />
     <ProjectReference Include="..\Leaguelane.Scheduler\Leaguelane.Scheduler.csproj" />
-    <ProjectReference Include="..\Leaguelane.ServiceDefaults\Leaguelane.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Leaguelane.Service\Leaguelane.Service.csproj" />
   </ItemGroup>
 
@@ -22,6 +21,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <PackageReference Include="Quartz.Extensions.Hosting" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
 </Project>

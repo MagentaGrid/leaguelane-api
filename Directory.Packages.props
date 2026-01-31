@@ -37,6 +37,7 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
     <PackageVersion Include="Quartz.Extensions.DependencyInjection" Version="3.14.0" />
     <PackageVersion Include="Quartz.Extensions.Hosting" Version="3.14.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.0.0" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
   </ItemGroup>
 </Project>

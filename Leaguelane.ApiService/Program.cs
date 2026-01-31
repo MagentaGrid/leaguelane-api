@@ -1,28 +1,37 @@
 using Leaguelane.Api.Configurations;
 using Leaguelane.ApiService.Endpoints;
 using Leaguelane.Persistence.Context;
-using Azure.Storage.Blobs;
 using Leaguelane.Scheduler;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add CORS
+// 1. Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontendLocalhost", policy =>
     {
-        policy
-            .AllowAnyOrigin() // or use .WithOrigins("http://localhost:60467") for stricter setup
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+        policy.AllowAnyOrigin() // <- WARNING: use only in dev
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
+
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("V1", new OpenApiInfo
+    {
+        Title = "LL API",
+        Version = "V1"
+    });
+});
+
 
 //sql connection
 builder.AddSqlServerDbContext<LeaguelaneDbContext>("LeaguelaneConnection");
 
 // Add service defaults & Aspire client integrations.
-builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -53,8 +62,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "LL API V1");
+});
+
 app.MapEndpoints();
 
-app.MapDefaultEndpoints();
 
 app.Run();

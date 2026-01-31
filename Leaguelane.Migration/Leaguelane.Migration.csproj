@@ -16,6 +16,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Leaguelane.Enums\Leaguelane.Enums.csproj" />
     <ProjectReference Include="..\Leaguelane.Persistence\Leaguelane.Persistence.csproj" />
-    <ProjectReference Include="..\Leaguelane.ServiceDefaults\Leaguelane.ServiceDefaults.csproj" />
   </ItemGroup>
 </Project>
