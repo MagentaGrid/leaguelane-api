@@ -16,5 +16,6 @@ namespace Leaguelane.Service.Services
         Task SoftDeleteFixtureAsync(int id, CancellationToken cancellationToken);
         Task SetRankAsync(int fixtureId, int rank, CancellationToken cancellationToken);
         Task<List<FixtureListItemDto>> GetLatestFixturesAsync(int page, int pageSize, CancellationToken cancellationToken);
+        Task<List<Fixture>> GetAllFixturesWithPaginationAsync(int page, int pageSize, CancellationToken cancellationToken);
     }
 }

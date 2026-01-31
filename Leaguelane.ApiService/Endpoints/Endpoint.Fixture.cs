@@ -17,9 +17,9 @@ namespace Leaguelane.ApiService.Endpoints
             return group;
         }
 
-        public static async Task<IResult> GetFixtures(ISender sender, CancellationToken cancellationToken)
+        public static async Task<IResult> GetFixtures(ISender sender, int page = 1, int pageSize = 6, CancellationToken cancellationToken = default)
         {
-            var result = await sender.Send(new GetAllFixturesQuery(), cancellationToken);
+            var result = await sender.Send(new GetAllFixturesQuery(page, pageSize), cancellationToken);
             return TypedResults.Ok(result);
         }
 
