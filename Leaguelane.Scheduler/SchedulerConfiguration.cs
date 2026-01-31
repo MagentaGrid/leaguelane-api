@@ -17,7 +17,7 @@ namespace Leaguelane.Scheduler
                 q.AddJob<CountryScheduler>(j => j.WithIdentity(nameof(CountryScheduler)));
                 q.AddJob<LeagueScheduler>(j => j.WithIdentity(nameof(LeagueScheduler)).StoreDurably());
                 q.AddJob<SeasonsScheduler>(j => j.WithIdentity(nameof(SeasonsScheduler)).StoreDurably());
-                //q.AddJob<FixtureScheduler>(j => j.WithIdentity(nameof(FixtureScheduler)).StoreDurably());
+                q.AddJob<FixtureScheduler>(j => j.WithIdentity(nameof(FixtureScheduler)).StoreDurably());
                 q.AddJob<RoundsScheduler>(j => j.WithIdentity(nameof(RoundsScheduler)).StoreDurably());
                 q.AddJob<TeamsScheduler>(j => j.WithIdentity(nameof(TeamsScheduler)).StoreDurably());
                 q.AddJob<TeamStatsScheduler>(j => j.WithIdentity(nameof(TeamStatsScheduler)).StoreDurably());
@@ -36,8 +36,8 @@ namespace Leaguelane.Scheduler
                 var chain = new JobChainingJobListener("JobChain");
                 chain.AddJobChainLink(new JobKey(nameof(CountryScheduler)), new JobKey(nameof(LeagueScheduler)));
                 chain.AddJobChainLink(new JobKey(nameof(LeagueScheduler)), new JobKey(nameof(SeasonsScheduler)));
-                chain.AddJobChainLink(new JobKey(nameof(SeasonsScheduler)), new JobKey(nameof(RoundsScheduler)));
-                //chain.AddJobChainLink(new JobKey(nameof(FixtureScheduler)), new JobKey(nameof(RoundsScheduler)));
+                chain.AddJobChainLink(new JobKey(nameof(SeasonsScheduler)), new JobKey(nameof(FixtureScheduler)));
+                chain.AddJobChainLink(new JobKey(nameof(FixtureScheduler)), new JobKey(nameof(RoundsScheduler)));
                 chain.AddJobChainLink(new JobKey(nameof(RoundsScheduler)), new JobKey(nameof(TeamsScheduler)));
                 chain.AddJobChainLink(new JobKey(nameof(TeamsScheduler)), new JobKey(nameof(TeamStatsScheduler)));
                 chain.AddJobChainLink(new JobKey(nameof(TeamStatsScheduler)), new JobKey(nameof(BetScheduler)));

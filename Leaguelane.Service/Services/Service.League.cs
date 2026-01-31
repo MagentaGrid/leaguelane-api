@@ -72,11 +72,11 @@ namespace Leaguelane.Service.Services
             }
             catch (HttpRequestException ex)
             {
-                return false;
+                throw ex;
             }
             catch (JsonException ex)
             {
-                return false;
+                throw ex;
             }
         }
     }

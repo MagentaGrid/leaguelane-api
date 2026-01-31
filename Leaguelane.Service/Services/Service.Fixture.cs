@@ -82,7 +82,8 @@ namespace Leaguelane.Service.Services
                         GoalsAway = f.Goals.Away,
 
                         Created = DateTime.UtcNow,
-                        Active = true
+                        Active = true,
+                        ApiFixtureId = (int)f.Fixture.Id
                     }).ToList();
 
                     await _fixtureRepository.AddFixturesBatchAsync(fixtureList, cancellationToken);

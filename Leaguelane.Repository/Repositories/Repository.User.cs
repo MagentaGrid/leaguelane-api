@@ -1,6 +1,7 @@
 ﻿using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,8 @@ namespace Leaguelane.Repository.Repositories
 
         public async Task<User> CreateUser(User user, CancellationToken cancellationToken)
         {
+            var passwordHasher = new PasswordHasher<User>();
+            user.Password = passwordHasher.HashPassword(user, user.Password);
             _context.Users.Add(user);
             await _context.SaveChangesAsync(cancellationToken);
             return user;
@@ -36,6 +39,8 @@ namespace Leaguelane.Repository.Repositories
 
         public async Task<User> UpdateUser(User user, CancellationToken cancellationToken)
         {
+            var passwordHasher = new PasswordHasher<User>();
+            passwordHasher.HashPassword(user, user.Password);
             _context.Users.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
             return user;
@@ -53,7 +58,29 @@ namespace Leaguelane.Repository.Repositories
 
         public async Task<User> AuthenticateUser(string userName, string password, CancellationToken cancellationToken)
         {
-            return await _context.Users.Where(x => x.UserName == userName && x.Password == password && x.Active == true).FirstOrDefaultAsync(cancellationToken);
+            var passwordHasher = new PasswordHasher<User>();
+            
+            var user = await _context.Users.Where(x => x.UserName == userName && x.Active == true).FirstOrDefaultAsync(cancellationToken);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            var result = passwordHasher.VerifyHashedPassword(
+                user,
+                user.Password,
+                password
+            );
+
+            if (result == PasswordVerificationResult.Success)
+            {
+                return user;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

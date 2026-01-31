@@ -1,6 +1,7 @@
 using Leaguelane.Constants.Enums;
 using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Trace;
 using System.Diagnostics;
@@ -56,6 +57,7 @@ public class Worker(
       
     public static async Task SeedUserDataAsync(LeaguelaneDbContext dbContext, CancellationToken cancellationToken)
     {
+        var passwordHasher = new PasswordHasher<User>();
         var userIds = new List<int> { 1 };
         var existingUsers = dbContext.Users.Where(r => userIds.Contains(r.UserId)).FirstOrDefault();
         if (existingUsers == null)
@@ -64,7 +66,7 @@ public class Worker(
             {
                 //UserId = 1,
                 UserName = "balaLeaguelane@gmail.com",
-                Password = "Leaguelane@Home!",
+                Password = passwordHasher.HashPassword(null, "Leaguelane@Home!"),
                 FirstName = "admin",
                 LastName = "admin",
                 Role = UserRole.Admin,

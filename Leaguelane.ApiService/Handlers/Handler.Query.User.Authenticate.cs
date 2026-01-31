@@ -9,8 +9,8 @@ using System.Text;
 
 namespace Leaguelane.Api.Handlers
 {
-    public record AuthenticateUserQuery(UserDto user) : IRequest<UserResponse>;
-    public class AuthenticateUserQueryHandler : IRequestHandler<AuthenticateUserQuery, UserResponse>
+    public record AuthenticateUserQuery(UserDto user) : IRequest<LoginResponse>;
+    public class AuthenticateUserQueryHandler : IRequestHandler<AuthenticateUserQuery, LoginResponse>
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
@@ -23,7 +23,7 @@ namespace Leaguelane.Api.Handlers
             _jwtService = jwtService;
         }
 
-        public async Task<UserResponse> Handle(AuthenticateUserQuery request, CancellationToken cancellationToken)
+        public async Task<LoginResponse> Handle(AuthenticateUserQuery request, CancellationToken cancellationToken)
         {
             try
             {
@@ -31,14 +31,22 @@ namespace Leaguelane.Api.Handlers
 
                 if (user == null)
                 {
-                    return new UserResponse(false, "Invalid username or password", null, "Dummy token");
+                    return new LoginResponse(false, "Invalid username or password", null, "");
                 }
 
-                return new UserResponse(true, "User authenticated successfully", user, _jwtService.GenerateToken(user.UserName, user.Role));
+                var loginResponse = new LoginReponseDto
+                {
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Role = user.Role,
+                    UserName = user.UserName
+                };
+
+                return new LoginResponse(true, "User authenticated successfully", loginResponse, _jwtService.GenerateToken(user.UserName, user.Role));
             }
             catch (Exception ex)
             {
-                return new UserResponse(false, ex.Message, null, "Dummy token");
+                return new LoginResponse(false, ex.Message, null, "");
             }
         }
     }
