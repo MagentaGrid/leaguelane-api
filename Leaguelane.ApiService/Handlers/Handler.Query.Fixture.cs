@@ -10,22 +10,21 @@ using System.Threading.Tasks;
 namespace Leaguelane.ApiService.Handlers
 {
     // Query Handlers
-    public record GetAllFixturesQuery() : IRequest<List<FixtureListItemDto>>;
+    public record GetAllFixturesQuery(int page = 1, int pageSize = 6) : IRequest<List<FixtureListItemDto>>;
     public class GetAllFixturesQueryHandler : IRequestHandler<GetAllFixturesQuery, List<FixtureListItemDto>>
     {
         private readonly IFixtureService _fixtureService;
-        public GetAllFixturesQueryHandler(IFixtureService fixtureService)
+        private readonly ITeamService _teamService;
+        public GetAllFixturesQueryHandler(IFixtureService fixtureService, ITeamService teamService)
         {
             _fixtureService = fixtureService;
+            _teamService = teamService;
         }
         public async Task<List<FixtureListItemDto>> Handle(GetAllFixturesQuery request, CancellationToken cancellationToken)
         {
-            var fixtures = await _fixtureService.GetAllFixturesAsync(cancellationToken);
-            return fixtures.ConvertAll(FixtureMapper.MapToListItemDto);
+            var fixtures = await _fixtureService.GetAllFixturesWithPaginationAsync(request.page, request.pageSize, cancellationToken);
+            var teams = await _teamService.GetAllTeamsById(fixtures.Select(f => (int)f.HomeTeamId).Concat( fixtures.Select(f => (int)f.AwayTeamId)), cancellationToken);
+            return fixtures.ConvertAll(x => FixtureMapper.MapToListItemDto(x, teams));
         }
-    }
-
-    
-
-    
+    }        
 }

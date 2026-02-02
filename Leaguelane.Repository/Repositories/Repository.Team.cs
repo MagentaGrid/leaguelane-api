@@ -46,5 +46,7 @@ namespace Leaguelane.Repository.Repositories
             }
             await _context.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task<Dictionary<int, Team>> GetAllTeamsById(IEnumerable<int> teamIds, CancellationToken cancellationToken) => await _context.Teams.Where(t => teamIds.Contains(t.ApiTeamId)).ToDictionaryAsync(t => t.ApiTeamId, cancellationToken);
     }
 }

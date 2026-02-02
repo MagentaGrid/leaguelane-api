@@ -8,5 +8,6 @@ namespace Leaguelane.Service.Services
     {
         Task FetchAndStoreTeamsAndVenuesAsync(int leagueId, int seasonId, int sportId, CancellationToken cancellationToken);
         Task ImportAllTeams(CancellationToken cancellationToken);
+        Task<Dictionary<int, Team>> GetAllTeamsById(IEnumerable<int> teamIds, CancellationToken cancellationToken);
     }
 }

@@ -119,5 +119,10 @@ namespace Leaguelane.Service.Services
                 }
             }
         }
+
+        public async Task<Dictionary<int, PersistenceTeam>> GetAllTeamsById(IEnumerable<int> teamIds, CancellationToken cancellationToken)
+        {
+            return await _teamRepository.GetAllTeamsById(teamIds, cancellationToken);
+        }
     }
 }

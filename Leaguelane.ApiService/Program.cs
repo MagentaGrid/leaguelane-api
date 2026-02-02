@@ -2,6 +2,7 @@ using Leaguelane.Api.Configurations;
 using Leaguelane.ApiService.Endpoints;
 using Leaguelane.Persistence.Context;
 using Leaguelane.Scheduler;
+using Leaguelane.ApiService.Middlewears;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -61,6 +62,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI(options =>
