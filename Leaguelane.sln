@@ -1,11 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35931.197
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Leaguelane.AppHost", "Leaguelane.AppHost\Leaguelane.AppHost.csproj", "{92F6CB1E-52A4-47F1-8399-D21A8C54A7FB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Leaguelane.ServiceDefaults", "Leaguelane.ServiceDefaults\Leaguelane.ServiceDefaults.csproj", "{412715BC-DE2E-C864-3D43-16CF1F6068FB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Leaguelane.ApiService", "Leaguelane.ApiService\Leaguelane.ApiService.csproj", "{9E8CC303-9830-77B3-5E03-2D7E5A7C1D3D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
@@ -35,14 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{92F6CB1E-52A4-47F1-8399-D21A8C54A7FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{92F6CB1E-52A4-47F1-8399-D21A8C54A7FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{92F6CB1E-52A4-47F1-8399-D21A8C54A7FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{92F6CB1E-52A4-47F1-8399-D21A8C54A7FB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{412715BC-DE2E-C864-3D43-16CF1F6068FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{412715BC-DE2E-C864-3D43-16CF1F6068FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{412715BC-DE2E-C864-3D43-16CF1F6068FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{412715BC-DE2E-C864-3D43-16CF1F6068FB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9E8CC303-9830-77B3-5E03-2D7E5A7C1D3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9E8CC303-9830-77B3-5E03-2D7E5A7C1D3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E8CC303-9830-77B3-5E03-2D7E5A7C1D3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
