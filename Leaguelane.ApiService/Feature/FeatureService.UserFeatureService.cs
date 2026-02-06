@@ -1,4 +1,5 @@
-﻿using Leaguelane.Models.Dtos;
+﻿using Azure.Core;
+using Leaguelane.Models.Dtos;
 using Leaguelane.Service.Services;
 using System.Security.Cryptography;
 
@@ -25,6 +26,8 @@ namespace Leaguelane.ApiService.Feature
                 var token = Convert.ToBase64String(tokenBytes);
                 var tokenHash = SHA256.HashData(tokenBytes);
 
+                //Store password reset token
+
                 var resetLink = $"{_config["FrontendUrl"]}/reset-password?token={token}";
 
             }
@@ -33,11 +36,22 @@ namespace Leaguelane.ApiService.Feature
 
         public async Task<BaseResponse> ResetPassword(ResetPasswordRequestDto resetPasswordRequestDto, CancellationToken cancellationToken)
         {
+            if(resetPasswordRequestDto.Password != resetPasswordRequestDto.ConfirmPassword)
+            {
+                return new BaseResponse(false, "Password and confirm password do not match", null);
+            }
+
+            var tokenBytes = Convert.FromBase64String(resetPasswordRequestDto.Token);
+            var tokenHash = SHA256.HashData(tokenBytes);
+
+            //Get and validate password reset token
+
             return new BaseResponse(true, "Password reset successfully", null);
         }
 
         public async Task<BaseResponse> ValidateResetPasswordToken(string token, CancellationToken cancellationToken)
         {
+            //Get and validate password reset token
             return new BaseResponse(true, "Validated token successfully", null);
         }
     }
