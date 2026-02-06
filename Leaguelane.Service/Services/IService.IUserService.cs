@@ -16,5 +16,6 @@ namespace Leaguelane.Service.Services
         Task<bool> IsUserNameExists(string userName, CancellationToken cancellationToken);
         Task<bool> IsUserNameExistsForUpdate(string userName, int userId, CancellationToken cancellationToken);
         Task<User> AuthenticateUser(string userName, string password, CancellationToken cancellationToken);
+        Task<User> GetUserByUserName(string userName, CancellationToken cancellationToken);
     }
 }

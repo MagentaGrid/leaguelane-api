@@ -1,4 +1,5 @@
-﻿using Leaguelane.Repository.Repositories;
+﻿using Leaguelane.ApiService.Feature;
+using Leaguelane.Repository.Repositories;
 using Leaguelane.Service.Services;
 
 namespace Leaguelane.Api.Configurations
@@ -12,6 +13,9 @@ namespace Leaguelane.Api.Configurations
 
             //Register repositories
             builder.Services.RegisterRepositories();
+
+            //Register feature services
+            builder.Services.RegisterFeatureServices();
         }
 
         private static IServiceCollection RegisterServices(this IServiceCollection services)
@@ -133,6 +137,14 @@ namespace Leaguelane.Api.Configurations
 
             //Register bet repositories
             services.AddScoped<IBetRepository, BetRepository>();
+
+            return services;
+        }
+
+        private static IServiceCollection RegisterFeatureServices(this IServiceCollection services)
+        {
+            //Register user feature services
+            services.AddScoped<IUserFeatureService, UserFeatureService>();
 
             return services;
         }

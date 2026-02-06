@@ -52,5 +52,10 @@ namespace Leaguelane.Service.Services
         {
             return await _userRepository.AuthenticateUser(userName, password, cancellationToken);
         }
+
+        public async Task<User> GetUserByUserName(string userName, CancellationToken cancellationToken)
+        {
+            return await _repository.FirstOrDefaultAsync<User>(x => x.UserName == userName, cancellationToken);
+        }
     }
 }
