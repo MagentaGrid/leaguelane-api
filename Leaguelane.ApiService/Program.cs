@@ -18,13 +18,14 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddOpenApi();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("V1", new OpenApiInfo
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "LL API",
-        Version = "V1"
+        Version = "v1"
     });
 });
 
@@ -38,7 +39,7 @@ builder.AddSqlServerDbContext<LeaguelaneDbContext>("LeaguelaneConnection");
 builder.Services.AddProblemDetails();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -68,7 +69,7 @@ app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "LL API V1");
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "LL API v1");
 });
 
 app.MapEndpoints();
