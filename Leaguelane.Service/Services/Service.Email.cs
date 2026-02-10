@@ -18,7 +18,7 @@ namespace Leaguelane.Service.Services
             _repository = repository;
         }
 
-        public async Task SendEmailAsync(NotificationTypes notificationType, object parameters)
+        public async Task SendEmailAsync(NotificationTypes notificationType, string email, object parameters)
         {
             var template = await _repository.FirstOrDefaultAsync<NotificationTemplate>(
                 x => x.NotificationType == notificationType && x.Status == "Active" && x.IsEmail);
@@ -29,7 +29,7 @@ namespace Leaguelane.Service.Services
             var processedBody = ApplyTemplate(template.Body, parameters);
 
             await SendAsync(
-                "swaraj.achu.50@gmail.com",
+                email,
                 template.Subject!,
                 processedBody,
                 true

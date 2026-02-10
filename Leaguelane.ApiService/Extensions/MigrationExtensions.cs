@@ -1,6 +1,7 @@
 using Leaguelane.Constants.Enums;
 using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
@@ -26,7 +27,7 @@ public static class MigrationExtensions
         }
         catch (Exception ex)
         {
-            activity?.RecordException(ex);
+            //activity?.RecordException(ex);
             throw;
         }
     }
@@ -51,7 +52,7 @@ public static class MigrationExtensions
       
     public static async Task SeedUserDataAsync(LeaguelaneDbContext dbContext, CancellationToken cancellationToken)
     {
-       // var passwordHasher = new PasswordHasher<User>();
+       var passwordHasher = new PasswordHasher<User>();
         var userIds = new List<int> { 1 };
         var existingUsers = await dbContext.Users.Where(r => userIds.Contains(r.UserId)).FirstOrDefaultAsync(cancellationToken);
         if (existingUsers == null)
@@ -60,7 +61,7 @@ public static class MigrationExtensions
             {
                 //UserId = 1,
                 UserName = "balaLeaguelane@gmail.com",
-              // Password = passwordHasher.HashPassword(null, "Leaguelane@Home!"),
+              Password = passwordHasher.HashPassword(null, "Leaguelane@Home!"),
                 FirstName = "admin",
                 LastName = "admin",
                 Role = UserRole.Admin,

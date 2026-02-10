@@ -40,7 +40,7 @@ namespace Leaguelane.Repository.Repositories
         public async Task<User> UpdateUser(User user, CancellationToken cancellationToken)
         {
             var passwordHasher = new PasswordHasher<User>();
-            passwordHasher.HashPassword(user, user.Password);
+            user.Password = passwordHasher.HashPassword(user, user.Password);
             _context.Users.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
             return user;

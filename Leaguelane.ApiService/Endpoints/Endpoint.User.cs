@@ -79,8 +79,9 @@ namespace Leaguelane.Api.Endpoints
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> ValidateResetToken([FromServices] IUserFeatureService userFeatureService, [FromQuery] string token, CancellationToken cancellationToken)
+        public static async Task<IResult> ValidateResetToken([FromServices] IUserFeatureService userFeatureService, [FromHeader(Name = "X-Reset-Token")] string token, CancellationToken cancellationToken)
         {
+
             var result = await userFeatureService.ValidateResetPasswordToken(token, cancellationToken);
             return TypedResults.Ok(result);
         }

@@ -3,6 +3,7 @@ using Leaguelane.Enums.Enums;
 using Leaguelane.Models.Dtos;
 using Leaguelane.Persistence.Entities;
 using Leaguelane.Service.Services;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Cryptography;
 
 namespace Leaguelane.ApiService.Feature
@@ -29,7 +30,7 @@ namespace Leaguelane.ApiService.Feature
             if (user != null)
             {
                 var tokenBytes = RandomNumberGenerator.GetBytes(64);
-                var token = Convert.ToBase64String(tokenBytes);
+                var token = WebEncoders.Base64UrlEncode(tokenBytes);
                 var tokenHash = SHA256.HashData(tokenBytes);
 
                 //Store password reset token
@@ -51,7 +52,7 @@ namespace Leaguelane.ApiService.Feature
                     ResetLink = resetLink
                 };
 
-                await _emailService.SendEmailAsync(NotificationTypes.ForgotPassword, resetPasswordParams);
+                await _emailService.SendEmailAsync(NotificationTypes.ForgotPassword, user.Email, resetPasswordParams);
 
             }
             return new BaseResponse(true, "Password reset link sent to your email", null);
@@ -64,8 +65,8 @@ namespace Leaguelane.ApiService.Feature
                 return new BaseResponse(false, "Password and confirm password do not match", null);
             }
 
-            var tokenBytes = Convert.FromBase64String(resetPasswordRequestDto.Token);
-            var tokenHash = SHA256.HashData(tokenBytes);
+            var urlDecodedToken = WebEncoders.Base64UrlDecode(resetPasswordRequestDto.Token);
+            var tokenHash = SHA256.HashData(urlDecodedToken);
 
             //Get and validate password reset token
 
@@ -91,14 +92,14 @@ namespace Leaguelane.ApiService.Feature
 
         public async Task<BaseResponse> ValidateResetPasswordToken(string token, CancellationToken cancellationToken)
         {
-            var tokenBytes = Convert.FromBase64String(token);
-            var tokenHash = SHA256.HashData(tokenBytes);
+            var urlDecodedToken = WebEncoders.Base64UrlDecode(token);
+            var tokenHash = SHA256.HashData(urlDecodedToken);
 
             var resetToken = await _passwordResetTokenService.GetTokenByTokenHashAsync(tokenHash, cancellationToken);
 
             if (resetToken == null || resetToken.ExpiresAt < DateTime.UtcNow || resetToken.Used)
             {
-                return new BaseResponse(false, "Invalid token", null);
+                throw new Exception( "Invalid token");
             }
 
             return new BaseResponse(true, "Validated token successfully", null);

@@ -4,6 +4,6 @@ namespace Leaguelane.Service.Services
 {
     public interface IEmailService
     {
-        Task SendEmailAsync(NotificationTypes notificationType, object parameters);
+        Task SendEmailAsync(NotificationTypes notificationType, string email, object parameters);
     }
 }
