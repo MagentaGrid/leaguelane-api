@@ -30,4 +30,6 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<OddsValue> OddsValues => Set<OddsValue>();
     public DbSet<Bookmaker> Bookmakers => Set<Bookmaker>();
     public DbSet<Bet> Bets => Set<Bet>();
+    public DbSet<NotificationTemplate> NotificationTemplates => Set<NotificationTemplate>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 }

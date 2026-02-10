@@ -1,5 +1,7 @@
 ﻿using Azure.Core;
+using Leaguelane.Enums.Enums;
 using Leaguelane.Models.Dtos;
+using Leaguelane.Persistence.Entities;
 using Leaguelane.Service.Services;
 using System.Security.Cryptography;
 
@@ -9,11 +11,15 @@ namespace Leaguelane.ApiService.Feature
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _config;
+        private readonly IEmailService _emailService;
+        private readonly IPasswordResetTokenService _passwordResetTokenService;
 
-        public UserFeatureService(IUserService userService, IConfiguration config)
+        public UserFeatureService(IUserService userService, IConfiguration config, IEmailService emailService, IPasswordResetTokenService passwordResetTokenService)
         {
             _userService = userService;
             _config = config;
+            _emailService = emailService;
+            _passwordResetTokenService = passwordResetTokenService;
         }
 
         public async Task<BaseResponse> ForgetPassword(ForgotPasswordRequestDto forgotPasswordRequestDto, CancellationToken cancellationToken)
@@ -27,8 +33,25 @@ namespace Leaguelane.ApiService.Feature
                 var tokenHash = SHA256.HashData(tokenBytes);
 
                 //Store password reset token
+                var resetToken = new PasswordResetToken
+                {
+                    UserId = user.UserId,
+                    TokenHash = tokenHash,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+                    Used = false
+                };
+
+                await _passwordResetTokenService.CreateAsync(resetToken, cancellationToken);
 
                 var resetLink = $"{_config["FrontendUrl"]}/reset-password?token={token}";
+
+                var resetPasswordParams = new
+                {
+                    Name = user.FirstName,
+                    ResetLink = resetLink
+                };
+
+                await _emailService.SendEmailAsync(NotificationTypes.ForgotPassword, resetPasswordParams);
 
             }
             return new BaseResponse(true, "Password reset link sent to your email", null);
@@ -46,12 +69,38 @@ namespace Leaguelane.ApiService.Feature
 
             //Get and validate password reset token
 
+            var resetToken = await _passwordResetTokenService.GetTokenByTokenHashAsync(tokenHash, cancellationToken);
+
+            if (resetToken == null || resetToken.ExpiresAt < DateTime.UtcNow || resetToken.Used)
+            {
+                return new BaseResponse(false, "Invalid token", null);
+            }
+
+            //Update password
+            var user = await _userService.GetUserById(resetToken.UserId, cancellationToken);
+
+            user.Password = resetPasswordRequestDto.Password;
+            await _userService.UpdateUser(user, cancellationToken);
+
+            //Mark token as used
+            resetToken.Used = true;
+            await _passwordResetTokenService.UpdateAsync(resetToken, cancellationToken);
+
             return new BaseResponse(true, "Password reset successfully", null);
         }
 
         public async Task<BaseResponse> ValidateResetPasswordToken(string token, CancellationToken cancellationToken)
         {
-            //Get and validate password reset token
+            var tokenBytes = Convert.FromBase64String(token);
+            var tokenHash = SHA256.HashData(tokenBytes);
+
+            var resetToken = await _passwordResetTokenService.GetTokenByTokenHashAsync(tokenHash, cancellationToken);
+
+            if (resetToken == null || resetToken.ExpiresAt < DateTime.UtcNow || resetToken.Used)
+            {
+                return new BaseResponse(false, "Invalid token", null);
+            }
+
             return new BaseResponse(true, "Validated token successfully", null);
         }
     }

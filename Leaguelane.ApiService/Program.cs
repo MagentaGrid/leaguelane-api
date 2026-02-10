@@ -1,5 +1,6 @@
 using Leaguelane.Api.Configurations;
 using Leaguelane.ApiService.Endpoints;
+using Leaguelane.ApiService.Extensions;
 using Leaguelane.Persistence.Context;
 using Leaguelane.Scheduler;
 using Leaguelane.ApiService.Middlewears;
@@ -73,5 +74,6 @@ app.UseSwaggerUI(options =>
 
 app.MapEndpoints();
 
+await app.EnsureDatabaseCreated();
 
 app.Run();

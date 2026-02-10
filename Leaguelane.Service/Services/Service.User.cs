@@ -1,4 +1,5 @@
-﻿using Leaguelane.Persistence.Entities;
+﻿using Leaguelane.Enums.Enums;
+using Leaguelane.Persistence.Entities;
 using Leaguelane.Repository.Repositories;
 using System;
 using System.Collections.Generic;

@@ -74,6 +74,12 @@ namespace Leaguelane.Api.Configurations
             //Register bet services
             services.AddScoped<IBetService, BetService>();
 
+            //Register email service
+            services.AddScoped<IEmailService, EmailService>();
+
+            //Register password reset token service
+            services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
+
             return services;
         }
 
