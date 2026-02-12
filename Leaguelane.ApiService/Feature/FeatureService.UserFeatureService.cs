@@ -52,7 +52,7 @@ namespace Leaguelane.ApiService.Feature
                     ResetLink = resetLink
                 };
 
-                await _emailService.SendEmailAsync(NotificationTypes.ForgotPassword, user.Email, resetPasswordParams);
+                await _emailService.SendEmailAsync(NotificationTypes.ForgotPassword, user.UserName, resetPasswordParams);
 
             }
             return new BaseResponse(true, "Password reset link sent to your email", null);
