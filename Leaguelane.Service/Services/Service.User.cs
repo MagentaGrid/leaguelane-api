@@ -1,4 +1,5 @@
-﻿using Leaguelane.Persistence.Entities;
+﻿using Leaguelane.Enums.Enums;
+using Leaguelane.Persistence.Entities;
 using Leaguelane.Repository.Repositories;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,11 @@ namespace Leaguelane.Service.Services
         public async Task<User> AuthenticateUser(string userName, string password, CancellationToken cancellationToken)
         {
             return await _userRepository.AuthenticateUser(userName, password, cancellationToken);
+        }
+
+        public async Task<User> GetUserByUserName(string userName, CancellationToken cancellationToken)
+        {
+            return await _repository.FirstOrDefaultAsync<User>(x => x.UserName == userName, cancellationToken);
         }
     }
 }

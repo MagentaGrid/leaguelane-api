@@ -71,4 +71,23 @@ namespace Leaguelane.Models.Dtos
         public string LastName { get; set; }
         public UserRole Role { get; set; }
     }
+
+    public class ForgotPasswordRequestDto
+    {
+        public string Email { get; set; }
+    }
+
+    public class ResetPasswordRequestDto
+    {
+        public string Token { get; set; }
+        public string Password { get; set; }
+        public string ConfirmPassword { get; set; }
+    }
+
+    public class ChangePasswordRequestDto
+    {
+        public string OldPassword { get; set; }
+        public string NewPassword { get; set; }
+        public string ConfirmPassword { get; set; }
+    }
 }
