@@ -5,7 +5,7 @@ namespace Leaguelane.Persistence.Context;
 
 public class LeaguelaneDbContext : DbContext
 {
-    public LeaguelaneDbContext(DbContextOptions options) : base(options)
+    public LeaguelaneDbContext(DbContextOptions<LeaguelaneDbContext> options) : base(options)
     {
     }
 
