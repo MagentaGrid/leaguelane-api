@@ -5,6 +5,7 @@ using Leaguelane.Persistence.Context;
 using Leaguelane.Scheduler;
 using Leaguelane.ApiService.Middlewears;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,9 +33,15 @@ builder.Services.AddSwaggerGen(options =>
 
 
 //sql connection
-builder.AddSqlServerDbContext<LeaguelaneDbContext>("LeaguelaneConnection");
+//builder.AddSqlServerDbContext<LeaguelaneDbContext>("LeaguelaneConnection");
 
-// Add service defaults & Aspire client integrations.
+builder.Services.AddDbContext<LeaguelaneDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("LeaguelaneConnection")));
+
+builder.Services.AddDbContext<LoggingDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("LoggingConnection")));
 
 // Add services to the container.
 builder.Services.AddProblemDetails();
@@ -65,6 +72,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseSwagger();
@@ -76,5 +84,6 @@ app.UseSwaggerUI(options =>
 app.MapEndpoints();
 
 await app.EnsureDatabaseCreated();
+await app.EnsureLoggingDatabaseCreated();
 
 app.Run();

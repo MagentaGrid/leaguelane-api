@@ -4,6 +4,7 @@ using Leaguelane.Persistence.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Threading;
 
 namespace Leaguelane.ApiService.Extensions;
 
@@ -27,12 +28,43 @@ public static class MigrationExtensions
         }
         catch (Exception ex)
         {
-            //activity?.RecordException(ex);
+            activity?.Dispose();
+            throw;
+        }
+    }
+
+    public static async Task EnsureLoggingDatabaseCreated(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<LoggingDbContext>();
+        var cancellationToken = CancellationToken.None;
+
+        //await dbContext.Database.EnsureCreatedAsync();
+
+        using var activity = s_activitySource.StartActivity("Migrating database", ActivityKind.Client);
+
+        try
+        {
+            await RunLoggingMigrationAsync(dbContext, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            activity?.Dispose();
             throw;
         }
     }
 
     private static async Task RunMigrationAsync(LeaguelaneDbContext dbContext, CancellationToken cancellationToken)
+    {
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            // Run migration in a transaction to avoid partial migration if it fails.
+            await dbContext.Database.MigrateAsync(cancellationToken);
+        });
+    }
+
+    private static async Task RunLoggingMigrationAsync(LoggingDbContext dbContext, CancellationToken cancellationToken)
     {
         var strategy = dbContext.Database.CreateExecutionStrategy();
         await strategy.ExecuteAsync(async () =>

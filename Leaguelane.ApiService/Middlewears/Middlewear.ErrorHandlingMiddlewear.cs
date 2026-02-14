@@ -2,6 +2,8 @@
 using System;
 using System.Net;
 using System.Text.Json;
+using Leaguelane.Persistence.Context;
+using Leaguelane.Persistence.Entities;
 
 namespace Leaguelane.ApiService.Middlewears
 {
@@ -16,7 +18,7 @@ namespace Leaguelane.ApiService.Middlewears
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, LoggingDbContext dbContext)
         {
             try
             {
@@ -25,6 +27,22 @@ namespace Leaguelane.ApiService.Middlewears
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unhandled exception occurred");
+
+                // Log to DB
+                var logEntry = new LogEntry
+                {
+                    Timestamp = DateTime.UtcNow,
+                    Message = ex.Message,
+                    StackTrace = ex.StackTrace,
+                    Source = ex.Source,
+                    RequestPath = context.Request.Path,
+                    RequestMethod = context.Request.Method,
+                    User = context.User?.Identity?.Name
+                };
+
+                dbContext.LogEntries.Add(logEntry);
+                await dbContext.SaveChangesAsync();
+
                 var code = HttpStatusCode.InternalServerError;
                 var result = string.Empty;
 
