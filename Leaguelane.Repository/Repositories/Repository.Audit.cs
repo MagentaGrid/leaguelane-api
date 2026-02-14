@@ -1,11 +1,6 @@
 ﻿using Leaguelane.Enums.Enums;
 using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Leaguelane.Repository.Repositories
 {
@@ -25,8 +20,9 @@ namespace Leaguelane.Repository.Repositories
                 JobName = job.ToString(),
                 Status = "Started",
                 Message = message,
-                Active=true,
+                Active = true,
                 Created = DateTime.UtcNow,
+                Updated = null,
                 SportId = 1
             };
 

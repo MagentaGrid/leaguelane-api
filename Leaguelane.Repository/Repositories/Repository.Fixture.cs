@@ -25,16 +25,26 @@ namespace Leaguelane.Repository.Repositories
             return fixture;
         }
 
-        public async Task AddFixturesBatchAsync(List<Fixture> fixture, CancellationToken cancellationToken)
+        public async Task AddFixturesBatchAsync(List<Fixture> fixtures, CancellationToken cancellationToken)
         {
-            var fixtureIds = fixture.Select(x => x.ApiFixtureId).ToList();
+            var incomingApiIds = fixtures.Select(x => x.ApiFixtureId).ToList();
 
-            var existingFixtures = await _context.Fixtures.Where(x => fixtureIds.Contains(x.ApiFixtureId)).ToListAsync(cancellationToken);
+            // 1. Get IDs that already exist in the DB
+            var existingApiIds = await _context.Fixtures
+                .Where(x => incomingApiIds.Contains(x.ApiFixtureId))
+                .Select(x => x.ApiFixtureId)
+                .ToListAsync(cancellationToken);
 
-            var fixturesToBeAdded = fixture.Where(x => !existingFixtures.Any(y => y.ApiFixtureId == x.FixtureId)).ToList();
+            // 2. Only add fixtures whose ApiFixtureId is NOT in the database
+            var fixturesToBeAdded = fixtures
+                .Where(x => !existingApiIds.Contains(x.ApiFixtureId))
+                .ToList();
 
-            await _context.Fixtures.AddRangeAsync(fixturesToBeAdded);
-            await _context.SaveChangesAsync(cancellationToken);
+            if (fixturesToBeAdded.Any())
+            {
+                await _context.Fixtures.AddRangeAsync(fixturesToBeAdded, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
         }
 
         public async Task<List<Fixture>> GetAllFixturesAsync(CancellationToken cancellationToken)

@@ -1,30 +1,24 @@
 ﻿using Leaguelane.Enums.Enums;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Leaguelane.Persistence.Entities
+namespace Leaguelane.Persistence.Entities;
+
+public class Audit: Entity
 {
-    public class Audit: Entity
-    {
-        [Key]
-        public int AuditId { get; set; }
+    [Key]
+    public int AuditId { get; set; }
 
-        public Jobs JobId { get; set; }
+    public Jobs JobId { get; set; }
 
-        public string JobName { get; set; }
+    public string JobName { get; set; }
 
-        public string Status { get; set; }
+    public string Status { get; set; }
 
-        public string? Message { get; set; }
+    public string? Message { get; set; }
 
-        public int SportId { get; set; }
+    public int SportId { get; set; }
 
-        [ForeignKey("SportId")]
-        public virtual Sport Sport { get; set; }
-    }
+    [ForeignKey("SportId")]
+    public virtual Sport Sport { get; set; }
 }
