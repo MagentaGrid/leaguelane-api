@@ -11,5 +11,7 @@ namespace Leaguelane.Repository.Repositories
     {
         Task<int> AddAuditAsync(Jobs job, string? message, CancellationToken cancellationToken);
         Task UpdateAuditAsync(int auditId, string status, string? message, CancellationToken cancellationToken);
+        Task<bool> IsAnyExistAsync(CancellationToken cancellationToken);
+        Task<bool> IsCompletedJobExist(Jobs job, CancellationToken cancellationToken);
     }
 }

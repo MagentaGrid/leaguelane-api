@@ -18,5 +18,10 @@ namespace Leaguelane.Service.Services
         {
             await _auditRepository.UpdateAuditAsync(auditId, status, message, cancellationToken);
         }
+
+        public async Task<bool> IsCompletedJobExist(Jobs job, CancellationToken cancellationToken)
+        {
+            return await _auditRepository.IsCompletedJobExist(job,cancellationToken);
+        }
     }
 }

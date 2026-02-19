@@ -178,8 +178,8 @@ namespace Leaguelane.Service.Services
                                 SportId = fixture.SportId ?? 0,
                                 BookmakerId = bookmaker.Id,
                                 BetTypeId = bet.Id,
-                                LastUpdated = DateTime.UtcNow,
-                                Created = DateTime.UtcNow,
+                                LastUpdated = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                                Created = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
                                 Active = true
                             };
                             int oddId = await _oddsRepository.AddOrUpdateOddAsync(odd, cancellationToken);

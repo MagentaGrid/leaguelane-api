@@ -54,15 +54,16 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
 });
 
-builder.Services.AddScheduler();
-
 builder.RegisterServices();
+
+builder.Services.AddScheduler();
 
 builder.JwtConfiguration();
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+//app.UseCors("AllowAll");
+app.UseCors("AllowFrontendLocalhost");
 
 // Configure the HTTP request pipeline.
 app.UseExceptionHandler();

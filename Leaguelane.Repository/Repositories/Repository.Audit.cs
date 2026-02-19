@@ -1,10 +1,11 @@
 ﻿using Leaguelane.Enums.Enums;
 using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Leaguelane.Repository.Repositories
 {
-    public class AuditRepository: IAuditRepository
+    public class AuditRepository : IAuditRepository
     {
         private readonly LeaguelaneDbContext _context;
         public AuditRepository(LeaguelaneDbContext context)
@@ -43,6 +44,23 @@ namespace Leaguelane.Repository.Repositories
                 _context.Audits.Update(audit);
                 await _context.SaveChangesAsync(cancellationToken);
             }
+        }
+
+        public async Task<bool> IsAnyExistAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _context.Audits.AnyAsync(cancellationToken);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> IsCompletedJobExist(Jobs job, CancellationToken cancellationToken)
+        {
+            return await _context.Audits.AnyAsync(x => x.JobId == job && x.Status == "Completed", cancellationToken);
         }
     }
 }
