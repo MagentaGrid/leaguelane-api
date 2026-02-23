@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Leaguelane.Service.Services
 {
-    public class FixtureService: IFixtureService
+    public class FixtureService : IFixtureService
     {
         private readonly HttpClient _httpClient = new HttpClient();
 
@@ -21,14 +21,16 @@ namespace Leaguelane.Service.Services
         private readonly string _apiKey;
         private readonly IFixtureRepository _fixtureRepository;
         private readonly ILeagueRepository _leagueRepository;
+        private readonly IRepository _repository;
 
-        public FixtureService(IConfiguration configuration, ILeagueRepository leagueRepository, IFixtureRepository fixtureRepository)
+        public FixtureService(IConfiguration configuration, ILeagueRepository leagueRepository, IFixtureRepository fixtureRepository, IRepository repository)
         {
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? throw new ArgumentNullException("BaseUrl");
             _apiHost = configuration["FootballApi:ApiHost"] ?? throw new ArgumentNullException("ApiHost");
             _apiKey = configuration["FootballApi:ApiKey"] ?? throw new ArgumentNullException("ApiKey");
             _fixtureRepository = fixtureRepository;
             _leagueRepository = leagueRepository;
+            _repository = repository;
         }
         public async Task GetAllFixtures(CancellationToken cancellationToken)
         {
@@ -62,7 +64,7 @@ namespace Leaguelane.Service.Services
                     responseBody,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if(fixtures != null && fixtures.Response != null && fixtures.Response.Count > 0)
+                if (fixtures != null && fixtures.Response != null && fixtures.Response.Count > 0)
                 {
                     var fixtureList = fixtures.Response.Select(f => new Fixture
                     {
@@ -96,9 +98,18 @@ namespace Leaguelane.Service.Services
             }
         }
 
-        public async Task<List<Fixture>> GetAllFixturesAsync(CancellationToken cancellationToken)
+        public async Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pagesize, bool publishStatus, CancellationToken cancellationToken)
         {
-            return await _fixtureRepository.GetAllFixturesAsync(cancellationToken);
+            var fixtures = await _repository.FindAllAsync<Fixture>(x => x.Date >= DateTime.UtcNow && (!publishStatus || x.PublishStatus), cancellationToken);
+
+            var totalCount = fixtures.Count();
+
+            var data = fixtures
+                .OrderByDescending(x => x.Date)
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize).ToList();
+
+            return (data, totalCount);
         }
 
         public async Task<Fixture> GetFixtureByIdAsync(int id, CancellationToken cancellationToken)
@@ -130,13 +141,28 @@ namespace Leaguelane.Service.Services
                 HomeTeam = new FixtureTeamDto { TeamId = f.HomeTeamId, Name = "", Logo = "" }, // Fill with actual data if available
                 AwayTeam = new FixtureTeamDto { TeamId = f.AwayTeamId, Name = "", Logo = "" },
                 Date = f.Date.HasValue ? f.Date.Value.ToString("yyyy-MM-dd") : null,
-                Time =  f.Date.HasValue ? f.Date.Value.ToString("HH:mm") : null
+                Time = f.Date.HasValue ? f.Date.Value.ToString("HH:mm") : null
             }).ToList();
         }
 
         public async Task<List<Fixture>> GetAllFixturesWithPaginationAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
             return await _fixtureRepository.GetAllFixturesWithPaginationAsync(page, pageSize, cancellationToken);
+        }
+
+        public async Task<int> GetUpcomingFixturesCountAsync(CancellationToken cancellationToken)
+        {
+            return await _repository.CountAsync<Fixture>(x => x.Date.HasValue && x.Date >= DateTime.UtcNow, cancellationToken);
+        }
+
+        public async Task<int> GetMissingTipsCountAsync(CancellationToken cancellationToken)
+        {
+            return await _repository.CountAsync<Fixture>(x => x.Date.HasValue && x.Date >= DateTime.UtcNow && !x.FixtureTips.Any(), cancellationToken);
+        }
+
+        public async Task<int> GetMissingPreviewsCountAsync(CancellationToken cancellationToken)
+        {
+            return await _repository.CountAsync<Fixture>(x => x.Date.HasValue && x.Date >= DateTime.UtcNow && !x.FixturePreviews.Any(), cancellationToken);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Leaguelane.Constants.Enums;
+using Leaguelane.Enums.Enums;
 using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -80,6 +81,7 @@ public static class MigrationExtensions
         await SeedContactDataAsync(dbContext, cancellationToken);
         await SeedAboutDataAsync(dbContext, cancellationToken);
         await SeedSportsDataAsync(dbContext, cancellationToken);
+        await SeedJobSchedulerDataAsync(dbContext, cancellationToken);
     }
       
     public static async Task SeedUserDataAsync(LeaguelaneDbContext dbContext, CancellationToken cancellationToken)
@@ -202,5 +204,103 @@ public static class MigrationExtensions
                 await transaction.CommitAsync(cancellationToken);
             });
         }
+    }
+
+    public static async Task SeedJobSchedulerDataAsync(
+    LeaguelaneDbContext dbContext,
+    CancellationToken cancellationToken)
+    {
+        // If at least one job exists, skip seeding
+        if (await dbContext.JobScheduelers.AnyAsync(cancellationToken))
+            return;
+
+        var now = DateTime.UtcNow;
+
+        var jobs = new List<JobSchedueler>
+    {
+        new()
+        {
+            JobScheduelerId = Jobs.Country,
+            Name = "Country",
+            RunStatus = "",
+            LastRun = null,
+            NextRun = null,
+            RunBy = "System",
+            Status = ""
+        },
+        new()
+        {
+            JobScheduelerId = Jobs.League,
+            Name = "League",
+            RunStatus = "",
+            LastRun = null,
+            NextRun = null,
+            RunBy = "System",
+            Status = ""
+        },
+        new()
+        {
+            JobScheduelerId = Jobs.Season,
+            Name = "Season",
+            RunStatus = "",
+            LastRun = null,
+            NextRun = null,
+            RunBy = "System",
+            Status = ""
+        },
+        new()
+        {
+            JobScheduelerId = Jobs.Fixture,
+            Name = "Fixture",
+            RunStatus = "",
+            LastRun = null,
+            NextRun = null,
+            RunBy = "System",
+            Status = ""
+        },
+        new()
+        {
+            JobScheduelerId = Jobs.Team,
+            Name = "Team",
+            RunStatus = "",
+            LastRun = null,
+            NextRun = null,
+            RunBy = "System",
+            Status = ""
+        },
+        new()
+        {
+            JobScheduelerId = Jobs.TeamStat,
+            Name = "TeamStat",
+            RunStatus = "",
+            LastRun = null,
+            NextRun = null,
+            RunBy = "System",
+            Status = ""
+        },
+        new()
+        {
+            JobScheduelerId = Jobs.Odds,
+            Name = "Odds",
+            RunStatus = "",
+            LastRun = null,
+            NextRun = null,
+            RunBy = "System",
+            Status = ""
+        }
+    };
+
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction =
+                await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            await dbContext.JobScheduelers.AddRangeAsync(jobs, cancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+        });
     }
 }

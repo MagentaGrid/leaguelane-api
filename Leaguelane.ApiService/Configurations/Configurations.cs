@@ -80,6 +80,9 @@ namespace Leaguelane.Api.Configurations
             //Register password reset token service
             services.AddScoped<IPasswordResetTokenService, PasswordResetTokenService>();
 
+            //Register job scheduler service
+            services.AddScoped<IJobSchedulerService, JobSchedulerService>();
+
             return services;
         }
 
@@ -151,6 +154,15 @@ namespace Leaguelane.Api.Configurations
         {
             //Register user feature services
             services.AddScoped<IUserFeatureService, UserFeatureService>();
+
+            //Register dashboard feature services
+            services.AddScoped<IDashboardFeatureService, DashboardFeatureService>();
+
+            //Register fixture feature services
+            services.AddScoped<IFixtureFeatureService, FixtureFeatureService>();
+
+            //Register jobscheduler feature services
+            services.AddScoped<IJobSchedulerFeatureService, JobSchedulerFeatureService>();
 
             return services;
         }

@@ -37,4 +37,8 @@ public class Fixture: Entity
 
     public int? Rank { get; set; } // For ranking fixtures
     public int ApiFixtureId { get; set; }
+    public bool PublishStatus { get; set; }
+
+    public virtual ICollection<FixturePreview>? FixturePreviews { get; set; }
+    public virtual ICollection<FixtureTip>? FixtureTips { get; set; }
 }
