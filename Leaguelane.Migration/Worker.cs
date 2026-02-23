@@ -64,7 +64,7 @@ public class Worker(
         {
             User user = new()
             {
-                //UserId = 1,
+                ////UserId = 1,
                 UserName = "arun.plf@leaguelane.com",
               // Password = passwordHasher.HashPassword(null, "Leaguelane@Home!"),
                 FirstName = "admin",
