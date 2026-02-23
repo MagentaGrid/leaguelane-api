@@ -32,6 +32,9 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<Bet> Bets => Set<Bet>();
     public DbSet<NotificationTemplate> NotificationTemplates => Set<NotificationTemplate>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+    public DbSet<FixturePreview> FixturePreviews => Set<FixturePreview>();
+    public DbSet<FixtureTip> FixtureTips => Set<FixtureTip>();
+    public DbSet<JobSchedueler> JobScheduelers => Set<JobSchedueler>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

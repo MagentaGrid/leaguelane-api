@@ -1,5 +1,8 @@
-﻿using Leaguelane.ApiService.Handlers;
+﻿using Leaguelane.ApiService.Feature;
+using Leaguelane.ApiService.Handlers;
+using Leaguelane.Constants.Enums;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Leaguelane.ApiService.Endpoints
 {
@@ -7,10 +10,15 @@ namespace Leaguelane.ApiService.Endpoints
     {
         public static RouteGroupBuilder AddJobRoutes(this RouteGroupBuilder group)
         {
-            group.MapGet("season", ScheduleSeason).WithName("job-season");
-            group.MapGet("country", ScheduleCountry).WithName("job-country");
-            group.MapGet("league", ScheduleLeague).WithName("job-league");
+            group.MapGet("", GetJobs).WithName("job-list")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
             return group;
+        }
+
+        public static async Task<IResult> GetJobs([FromServices] IJobSchedulerFeatureService jobSchedulerFeatureService, CancellationToken cancellationToken)
+        {
+            var result = await jobSchedulerFeatureService.GetAllJobScheduler(cancellationToken);
+            return TypedResults.Ok(result);
         }
 
         public static async Task<IResult> ScheduleSeason(ISender sender, CancellationToken cancellationToken)
