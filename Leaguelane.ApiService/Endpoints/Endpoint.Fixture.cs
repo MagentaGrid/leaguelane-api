@@ -1,6 +1,8 @@
+using Leaguelane.ApiService.Feature;
 using Leaguelane.ApiService.Handlers;
 using Leaguelane.Models.Dtos;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Leaguelane.ApiService.Endpoints
 {
@@ -17,9 +19,9 @@ namespace Leaguelane.ApiService.Endpoints
             return group;
         }
 
-        public static async Task<IResult> GetFixtures(ISender sender, int page = 1, int pageSize = 6, CancellationToken cancellationToken = default)
+        public static async Task<IResult> GetFixtures([FromServices] IFixtureFeatureService fixtureFeatureService, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
         {
-            var result = await sender.Send(new GetAllFixturesQuery(page, pageSize), cancellationToken);
+            var result = await fixtureFeatureService.GetFixtures(page, pageSize, cancellationToken);
             return TypedResults.Ok(result);
         }
 

@@ -14,6 +14,7 @@ namespace Leaguelane.ApiService.Endpoints
             app.MapGroup("/jobs").AddJobRoutes().WithTags("Job").WithName("Job");
             app.MapGroup("/job-configuration").AddJobConfigurationRoutes().WithTags("Job-Configuration");
             app.MapGroup("/fixtures").AddFixtureRoutes().WithTags("Fixture").WithName("Fixture");
+            app.MapGroup("/dashboard").AddDashboardRoutes().WithTags("Dashboard").WithName("Dashboard");
         }
     }
 }
