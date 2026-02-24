@@ -94,7 +94,7 @@ public static class MigrationExtensions
             User user = new()
             {
                 //UserId = 1,
-                UserName = "balaLeaguelane@gmail.com",
+                UserName = "arun.plf@leaguelane.com",
               Password = passwordHasher.HashPassword(null, "Leaguelane@Home!"),
                 FirstName = "admin",
                 LastName = "admin",
