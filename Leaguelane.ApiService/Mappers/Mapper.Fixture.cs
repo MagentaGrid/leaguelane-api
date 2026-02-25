@@ -63,5 +63,47 @@ namespace Leaguelane.ApiService.Mappers
                 ApiFixtureId = dto.FixtureId
             };
         }
+
+        public static List<FixtureApiResponseDto> MapToApiResponseDto(List<Fixture> fixtures
+            , List<Leaguelane.Persistence.Entities.Venue> venues
+            , List<Leaguelane.Persistence.Entities.Team> teams
+            , List<Leaguelane.Persistence.Entities.League> leagues)
+        {
+           var fixtureResponse = new List<FixtureApiResponseDto>();
+
+            foreach (Fixture fixture in fixtures)
+            {
+                var venue = venues.FirstOrDefault(v => v.ApiVenueId == fixture.VenueId);
+                var homeTeam = teams.FirstOrDefault(t => t.ApiTeamId == fixture.HomeTeamId);
+                var awayTeam = teams.FirstOrDefault(t => t.ApiTeamId == fixture.AwayTeamId);
+                var league = leagues.FirstOrDefault(l => l.ApiLeagueId == fixture.LeagueId);
+                fixtureResponse.Add(new FixtureApiResponseDto
+                {
+                    FixtureId = fixture.FixtureId,
+                    Date = fixture.Date,
+                    Time = fixture.Time,
+                    GoalsHome = fixture.GoalsHome,
+                    GoalsAway = fixture.GoalsAway,
+                    Status = fixture.Status,
+                    ApiFixtureId= fixture.ApiFixtureId,
+                    AwayTeamId= fixture.AwayTeamId,
+                    AwayTeamName= awayTeam?.Name,
+                    HomeTeamId= fixture?.HomeTeamId,
+                    HomeTeamName= homeTeam?.Name,
+                    VenueId= fixture?.VenueId,
+                    VenueName= venue?.Name,
+                    LeagueId= fixture.LeagueId,
+                    LeagueName= league?.Name,
+                    SeasonId= fixture.SeasonId,
+                    PublishStatus= fixture.PublishStatus,
+                    Rank= fixture.Rank,
+                    RoundId= fixture.RoundId,
+                    SportId= fixture.SportId,
+                    Timezone= fixture.Timezone,
+                });
+            }
+
+            return fixtureResponse;
+        }
     }
 }

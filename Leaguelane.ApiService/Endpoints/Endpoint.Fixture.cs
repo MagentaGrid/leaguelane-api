@@ -1,5 +1,6 @@
 using Leaguelane.ApiService.Feature;
 using Leaguelane.ApiService.Handlers;
+using Leaguelane.Constants.Enums;
 using Leaguelane.Models.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,13 @@ namespace Leaguelane.ApiService.Endpoints
     {
         public static RouteGroupBuilder AddFixtureRoutes(this RouteGroupBuilder group)
         {
-            group.MapGet("", GetFixtures).WithName("fixtures");
-            group.MapGet("{id:int}", GetFixtureById).WithName("fixture-by-id");
-            group.MapPut("{id:int}", UpdateFixture).WithName("fixture-update");
-            group.MapDelete("{id:int}", DeleteFixture).WithName("fixture-delete");
-            group.MapPut("{id:int}/rank", SetRank).WithName("fixture-set-rank");
-            group.MapGet("latest", GetLatestFixtures).WithName("fixtures-latest");
+            group.MapGet("", GetFixtures).WithName("fixtures")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+            //group.MapGet("{id:int}", GetFixtureById).WithName("fixture-by-id");
+            //group.MapPut("{id:int}", UpdateFixture).WithName("fixture-update");
+            //group.MapDelete("{id:int}", DeleteFixture).WithName("fixture-delete");
+            //group.MapPut("{id:int}/rank", SetRank).WithName("fixture-set-rank");
+            //group.MapGet("latest", GetLatestFixtures).WithName("fixtures-latest");
             return group;
         }
 

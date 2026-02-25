@@ -105,7 +105,7 @@ namespace Leaguelane.Service.Services
             var totalCount = fixtures.Count();
 
             var data = fixtures
-                .OrderByDescending(x => x.Date)
+                .OrderBy(x => x.Date)
                 .Skip((page - 1) * pagesize)
                 .Take(pagesize).ToList();
 

@@ -83,6 +83,9 @@ namespace Leaguelane.Api.Configurations
             //Register job scheduler service
             services.AddScoped<IJobSchedulerService, JobSchedulerService>();
 
+            //Register venue services
+            services.AddScoped<IVenueService, VenueService>();
+
             return services;
         }
 
