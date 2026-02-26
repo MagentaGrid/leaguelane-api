@@ -20,5 +20,7 @@ namespace Leaguelane.Service.Services
         Task<int> GetUpcomingFixturesCountAsync(CancellationToken cancellationToken);
         Task<int> GetMissingPreviewsCountAsync(CancellationToken cancellationToken);
         Task<int> GetMissingTipsCountAsync(CancellationToken cancellationToken);
+        Task<bool> UnPublishFixture(int fixtureId, CancellationToken cancellationToken);
+        Task<bool> PublishFixture(int fixtureId, CancellationToken cancellationToken);
     }
 }

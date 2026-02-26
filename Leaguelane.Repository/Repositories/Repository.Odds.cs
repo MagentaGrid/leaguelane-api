@@ -159,5 +159,10 @@ namespace Leaguelane.Repository.Repositories
         {
             return await _context.OddsValues.Where(v => v.OddsId == oddsId && v.Active == true).ToListAsync(cancellationToken);
         }
+
+        public async Task<bool> IsOddExistsAsync(int fixtureId, int bookmakerId, int betTypeId, CancellationToken cancellationToken)
+        {
+            return await _context.Odds.AnyAsync(o => o.FixtureId == fixtureId && o.BookmakerId == bookmakerId && o.BetTypeId == betTypeId, cancellationToken);
+        }
     }
 }

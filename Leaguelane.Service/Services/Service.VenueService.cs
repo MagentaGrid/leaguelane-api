@@ -16,5 +16,10 @@ namespace Leaguelane.Service.Services
         {
             return (await _repository.FindAllAsync<Venue>(x => ids.Contains(x.ApiVenueId))).ToList();
         }
+
+        public async Task<Venue> GetVenueByApiId(int id, CancellationToken cancellationToken)
+        {
+            return await _repository.FirstOrDefaultAsync<Venue>(x => x.ApiVenueId == id, cancellationToken);
+        }
     }
 }

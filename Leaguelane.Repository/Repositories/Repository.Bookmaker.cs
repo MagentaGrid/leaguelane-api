@@ -13,25 +13,11 @@ namespace Leaguelane.Repository.Repositories
             _context = context;
         }
 
-        public async Task<List<Bookmaker>> AddBookmakers(List<string> bookmakerNames, CancellationToken cancellationToken)
+        public async Task<List<Bookmaker>> AddBookmakers(List<Bookmaker> bookmakers, CancellationToken cancellationToken)
         {
             var existingBookmakers = await _context.Bookmakers.Where(x => x.Active == true).ToListAsync(cancellationToken);
-            var existingNames = existingBookmakers.Select(b => b.Name).ToList();
-            var newBookmakers = new List<Bookmaker>();
-
-            foreach (var name in bookmakerNames)
-            {
-                if (!existingNames.Contains(name))
-                {
-                    var newBookmaker = new Bookmaker
-                    {
-                        Active = true,
-                        Created = DateTime.UtcNow,
-                        Name = name
-                    };
-                    newBookmakers.Add(newBookmaker);
-                }
-            }
+            var existingApiIds = existingBookmakers.Select(b => (int)b.ApiBookMakerId).ToList();
+            var newBookmakers = bookmakers.Where(b => !existingApiIds.Contains(b.ApiBookMakerId)).ToList();
 
             await _context.Bookmakers.AddRangeAsync(newBookmakers, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);

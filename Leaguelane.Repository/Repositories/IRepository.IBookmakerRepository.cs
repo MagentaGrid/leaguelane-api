@@ -7,7 +7,7 @@ namespace Leaguelane.Repository.Repositories
 {
     public interface IBookmakerRepository
     {
-        Task<List<Bookmaker>> AddBookmakers(List<string> bookmakerNames, CancellationToken cancellationToken);
+        Task<List<Bookmaker>> AddBookmakers(List<Bookmaker> bookmakers, CancellationToken cancellationToken);
         Task<List<Bookmaker>> GetActiveBookmakersAsync(CancellationToken cancellationToken);
         Task<List<Bookmaker>> GetAllBookmakersAsync(CancellationToken cancellationToken);
         Task<Bookmaker?> GetBookmakerByIdAsync(int id, CancellationToken cancellationToken);

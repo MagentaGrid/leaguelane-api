@@ -86,6 +86,12 @@ namespace Leaguelane.Api.Configurations
             //Register venue services
             services.AddScoped<IVenueService, VenueService>();
 
+            //Register tip service
+            services.AddScoped<ITipService, TipService>();
+
+            //Register preview service
+            services.AddScoped<IPreviewService, PreviewService>();
+
             return services;
         }
 
@@ -166,6 +172,9 @@ namespace Leaguelane.Api.Configurations
 
             //Register jobscheduler feature services
             services.AddScoped<IJobSchedulerFeatureService, JobSchedulerFeatureService>();
+
+            //Register odds feature services
+            services.AddScoped<IOddFeatureService, OddFeatureService>();
 
             return services;
         }

@@ -11,5 +11,6 @@ namespace Leaguelane.Service.Services
     {
         Task<bool> GetAllLeaguesAsync(CancellationToken cancellationToken);
         Task<List<League>> GetAllActiveLeaguesByIds(List<int> ids, CancellationToken cancellationToken);
+        Task<League> GetLeagueByApiIdAsync(int id, CancellationToken cancellationToken);
     }
 }

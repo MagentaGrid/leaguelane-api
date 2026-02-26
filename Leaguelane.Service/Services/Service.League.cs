@@ -86,5 +86,10 @@ namespace Leaguelane.Service.Services
         {
             return (await _repository.FindAllAsync<League>(x => ids.Contains(x.ApiLeagueId), cancellationToken)).ToList();
         }
+
+        public async Task<League> GetLeagueByApiIdAsync(int id, CancellationToken cancellationToken)
+        {
+            return await _repository.FirstOrDefaultAsync<League>(x => x.ApiLeagueId == id, cancellationToken);
+        }
     }
 }

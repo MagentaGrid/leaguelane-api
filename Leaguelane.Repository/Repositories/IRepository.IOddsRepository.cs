@@ -17,5 +17,6 @@ namespace Leaguelane.Repository.Repositories
         Task SoftDeleteOddsAsync(int id, CancellationToken cancellationToken);
         Task RestoreOddsAsync(int id, CancellationToken cancellationToken);
         Task<List<OddsValue>> GetOddsValuesAsync(int oddsId, CancellationToken cancellationToken);
+        Task<bool> IsOddExistsAsync(int fixtureId, int bookmakerId, int betTypeId, CancellationToken cancellationToken);
     }
 }

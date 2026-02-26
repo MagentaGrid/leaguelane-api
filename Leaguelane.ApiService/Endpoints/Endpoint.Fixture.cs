@@ -13,9 +13,22 @@ namespace Leaguelane.ApiService.Endpoints
         {
             group.MapGet("", GetFixtures).WithName("fixtures")
                 .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
-            //group.MapGet("{id:int}", GetFixtureById).WithName("fixture-by-id");
-            //group.MapPut("{id:int}", UpdateFixture).WithName("fixture-update");
-            //group.MapDelete("{id:int}", DeleteFixture).WithName("fixture-delete");
+
+            group.MapGet("{id:int}", GetFixtureById).WithName("fixture-by-id")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
+            group.MapPatch("publish", PublishFixture).WithName("fixture-publish")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
+            group.MapPatch("unpublish", UnPublishFixture).WithName("fixture-unpublish")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
+            group.MapPost("tip", CreateTip).WithName("fixture-tip-create")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
+            group.MapPost("preview", CreatePreview).WithName("fixture-preview-create")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
             //group.MapPut("{id:int}/rank", SetRank).WithName("fixture-set-rank");
             //group.MapGet("latest", GetLatestFixtures).WithName("fixtures-latest");
             return group;
@@ -27,33 +40,33 @@ namespace Leaguelane.ApiService.Endpoints
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> GetFixtureById(ISender sender, int id, CancellationToken cancellationToken)
+        public static async Task<IResult> GetFixtureById([FromServices] IFixtureFeatureService fixtureFeatureService, int id, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetFixtureByIdQuery(id), cancellationToken);
+            var result = await fixtureFeatureService.GetFixtureDetailsById(id, cancellationToken);
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> UpdateFixture(ISender sender, int id, FixtureDto fixture, CancellationToken cancellationToken)
+        public static async Task<IResult> PublishFixture([FromServices] IFixtureFeatureService fixtureFeatureService, [FromQuery] int fixtureId, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new UpdateFixtureCommand(id, fixture), cancellationToken);
+            var result = await fixtureFeatureService.PublishFixture(fixtureId, cancellationToken);
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> DeleteFixture(ISender sender, int id, CancellationToken cancellationToken)
+        public static async Task<IResult> UnPublishFixture([FromServices] IFixtureFeatureService fixtureFeatureService, [FromQuery] int fixtureId, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new SoftDeleteFixtureCommand(id), cancellationToken);
+            var result = await fixtureFeatureService.UnPublishFixture(fixtureId, cancellationToken);
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> SetRank(ISender sender, int id, SetRankRequestDto request, CancellationToken cancellationToken)
+        public static async Task<IResult> CreateTip([FromServices] IFixtureFeatureService fixtureFeatureService, [FromBody] TipRequestDto tipRequestDto, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new SetRankCommand(id, request.Rank), cancellationToken);
+            var result = await fixtureFeatureService.CreateTips(tipRequestDto, cancellationToken);
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> GetLatestFixtures(ISender sender, int page, int pageSize, CancellationToken cancellationToken)
+        public static async Task<IResult> CreatePreview([FromServices] IFixtureFeatureService fixtureFeatureService, [FromBody] PreviewRequestDto previewRequestDto, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new GetLatestFixtureQuery(page, pageSize), cancellationToken);
+            var result = await fixtureFeatureService.CreatePreview(previewRequestDto, cancellationToken);
             return TypedResults.Ok(result);
         }
     }

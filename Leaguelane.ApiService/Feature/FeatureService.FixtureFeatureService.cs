@@ -1,6 +1,8 @@
-﻿using Leaguelane.ApiService.Mappers;
+﻿using Leaguelane.Api.Mappers;
+using Leaguelane.ApiService.Mappers;
 using Leaguelane.Models.Dtos;
 using Leaguelane.Service.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Leaguelane.ApiService.Feature
 {
@@ -10,12 +12,27 @@ namespace Leaguelane.ApiService.Feature
         private readonly IVenueService _venueService;
         private readonly ITeamService _teamService;
         private readonly ILeagueService _leagueService;
-        public FixtureFeatureService(IFixtureService fixtureService, IVenueService venueService, ITeamService teamService, ILeagueService leagueService)
+        private readonly ITipService _tipService;
+        private readonly IPreviewService _previewService;
+        private readonly IOddsService _oddsService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        public FixtureFeatureService(IFixtureService fixtureService
+            , IVenueService venueService
+            , ITeamService teamService
+            , ILeagueService leagueService
+            , ITipService tipService
+            , IPreviewService previewService
+            , IOddsService oddsService
+            , IServiceScopeFactory serviceScopeFactory)
         {
             _fixtureService = fixtureService;
             _venueService = venueService;
             _teamService = teamService;
             _leagueService = leagueService;
+            _tipService = tipService;
+            _previewService = previewService;
+            _oddsService = oddsService;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async Task<PaginationBaseResponse> GetFixtures(int page, int pageSize,CancellationToken cancellationToken)
@@ -44,6 +61,60 @@ namespace Leaguelane.ApiService.Feature
                 totalCount, 
                 totalPages
             );
+        }
+
+        public async Task<BaseResponse> PublishFixture(int fixtureId, CancellationToken cancellationToken)
+        {
+            await _fixtureService.PublishFixture(fixtureId, cancellationToken);
+
+            return new BaseResponse(true, "Published fixture", true);
+        }
+
+        public async Task<BaseResponse> UnPublishFixture(int fixtureId, CancellationToken cancellationToken)
+        {
+            await _fixtureService.UnPublishFixture(fixtureId, cancellationToken);
+
+            return new BaseResponse(true, "Unpublished fixture", true);
+        }
+
+        public async Task<BaseResponse> CreateTips(TipRequestDto tipRequestDto, CancellationToken cancellationToken)
+        {
+            await _tipService.AddTipAsync(TipMapper.MapToEntity(tipRequestDto), cancellationToken);
+
+            return new BaseResponse(true, "Tip added successfully", true);
+        }
+
+        public async Task<BaseResponse> CreatePreview(PreviewRequestDto previewRequestDto, CancellationToken cancellationToken)
+        {
+            await _previewService.AddPreviewAsync(PreviewMapper.MapToEntity(previewRequestDto), cancellationToken);
+
+            return new BaseResponse(true, "Preview added successfully", true);
+        }
+
+        public async Task<BaseResponse> GetFixtureDetailsById(int fixtureId, CancellationToken cancellationToken)
+        {
+            var fixture = await _fixtureService.GetFixtureByIdAsync(fixtureId, cancellationToken);
+
+            if (fixture == null)
+                return new BaseResponse(false, "Fixture not found", null);
+
+            if(!await _oddsService.IsOddExistsAsync(fixtureId, cancellationToken))
+            {
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var oddsService = scope.ServiceProvider.GetRequiredService<IOddsService>();
+
+                    await oddsService.FetchAndStoreOddsAsync(fixture, CancellationToken.None);
+                });
+            }
+
+            var teams = await _teamService.GetAllTeamsByIds([fixture.HomeTeamId ?? 0, fixture.AwayTeamId ?? 0], cancellationToken);
+
+            var league = await _leagueService.GetLeagueByApiIdAsync(fixture.LeagueId, cancellationToken);
+            var venue = await _venueService.GetVenueByApiId(fixture.VenueId ?? 0, cancellationToken);
+
+            return new BaseResponse(true, "Fixture fetched successfully", FixtureMapper.FixtureDetailsApiResponseDto(fixture, teams, league, venue));
         }
     }
 }

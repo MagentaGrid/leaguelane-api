@@ -124,6 +124,9 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<bool?>("Active")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("ApiBetId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("BetId")
                         .HasColumnType("integer");
 
@@ -144,7 +147,7 @@ namespace Leaguelane.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BetId")
+                    b.HasIndex("ApiBetId")
                         .IsUnique();
 
                     b.ToTable("Bets");
@@ -440,7 +443,7 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<bool>("IsVisible")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("OddsId")
+                    b.Property<int>("OddsValueId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Reasoning")
@@ -464,7 +467,7 @@ namespace Leaguelane.Persistence.Migrations
 
                     b.HasIndex("FixtureId");
 
-                    b.HasIndex("OddsId");
+                    b.HasIndex("OddsValueId");
 
                     b.ToTable("FixtureTips");
                 });
@@ -763,8 +766,9 @@ namespace Leaguelane.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal>("Odd")
-                        .HasColumnType("numeric");
+                    b.Property<string>("Odd")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("OddsId")
                         .HasColumnType("integer");
@@ -776,6 +780,8 @@ namespace Leaguelane.Persistence.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OddsId");
 
                     b.ToTable("OddsValues");
                 });
@@ -1232,7 +1238,7 @@ namespace Leaguelane.Persistence.Migrations
             modelBuilder.Entity("Leaguelane.Persistence.Entities.FixturePreview", b =>
                 {
                     b.HasOne("Leaguelane.Persistence.Entities.Fixture", "Fixture")
-                        .WithMany()
+                        .WithMany("FixturePreviews")
                         .HasForeignKey("FixtureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1255,14 +1261,14 @@ namespace Leaguelane.Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("Leaguelane.Persistence.Entities.Fixture", "Fixture")
-                        .WithMany()
+                        .WithMany("FixtureTips")
                         .HasForeignKey("FixtureId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Leaguelane.Persistence.Entities.Odd", "Odds")
+                    b.HasOne("Leaguelane.Persistence.Entities.OddsValue", "OddsValue")
                         .WithMany()
-                        .HasForeignKey("OddsId")
+                        .HasForeignKey("OddsValueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1272,7 +1278,7 @@ namespace Leaguelane.Persistence.Migrations
 
                     b.Navigation("Fixture");
 
-                    b.Navigation("Odds");
+                    b.Navigation("OddsValue");
                 });
 
             modelBuilder.Entity("Leaguelane.Persistence.Entities.JobConfiguration", b =>
@@ -1320,6 +1326,17 @@ namespace Leaguelane.Persistence.Migrations
                     b.Navigation("Season");
                 });
 
+            modelBuilder.Entity("Leaguelane.Persistence.Entities.OddsValue", b =>
+                {
+                    b.HasOne("Leaguelane.Persistence.Entities.Odd", "Odds")
+                        .WithMany("OddsValues")
+                        .HasForeignKey("OddsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Odds");
+                });
+
             modelBuilder.Entity("Leaguelane.Persistence.Entities.PasswordResetToken", b =>
                 {
                     b.HasOne("Leaguelane.Persistence.Entities.User", "User")
@@ -1329,6 +1346,18 @@ namespace Leaguelane.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Leaguelane.Persistence.Entities.Fixture", b =>
+                {
+                    b.Navigation("FixturePreviews");
+
+                    b.Navigation("FixtureTips");
+                });
+
+            modelBuilder.Entity("Leaguelane.Persistence.Entities.Odd", b =>
+                {
+                    b.Navigation("OddsValues");
                 });
 #pragma warning restore 612, 618
         }

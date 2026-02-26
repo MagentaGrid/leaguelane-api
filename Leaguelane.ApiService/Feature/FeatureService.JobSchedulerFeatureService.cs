@@ -20,7 +20,7 @@ namespace Leaguelane.ApiService.Feature
         {
             var data = await _jobSchedulerService.GetAllJobScheduler(cancellationToken);
 
-            return new BaseResponse(true, "Job Schedulers fetched successfully", data.Select(JobSchedulerMapper.ToDto).ToList());
+            return new BaseResponse(true, "Job Schedulers fetched successfully", data.Select(JobSchedulerMapper.ToDto).OrderBy(x => x.JobScheduelerId).ToList());
         }
 
         public async Task<BaseResponse> TriggerJob(Jobs job, CancellationToken cancellationToken)
@@ -36,6 +36,8 @@ namespace Leaguelane.ApiService.Feature
                 Jobs.Team => new JobKey(nameof(TeamsScheduler)),
                 Jobs.TeamStat => new JobKey(nameof(TeamStatsScheduler)),
                 Jobs.Fixture => new JobKey(nameof(FixtureScheduler)),
+                Jobs.Bet => new JobKey(nameof(BetScheduler)),
+                Jobs.Bookmaker => new JobKey(nameof(BookmakerScheduler)),
                 _ => throw new Exception("Invalid job")
             };
 
