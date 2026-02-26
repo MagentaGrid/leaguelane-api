@@ -15,18 +15,20 @@ namespace Leaguelane.Service.Services
     {
         private readonly HttpClient _httpClient = new HttpClient();
         private readonly ILeagueRepository _leagueRepository;
+        private readonly IRepository _repository;
 
         private readonly string _baseUrl;
         private readonly string _apiHost;
         private readonly string _apiKey;
 
-        public LeagueService(IConfiguration configuration, ILeagueRepository leagueRepository)
+        public LeagueService(IConfiguration configuration, ILeagueRepository leagueRepository, IRepository repository)
         {
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? throw new ArgumentNullException("BaseUrl");
             _apiHost = configuration["FootballApi:ApiHost"] ?? throw new ArgumentNullException("ApiHost");
             _apiKey = configuration["FootballApi:ApiKey"] ?? throw new ArgumentNullException("ApiKey");
 
             _leagueRepository = leagueRepository;
+            _repository = repository;
         }
 
         public async Task<bool> GetAllLeaguesAsync(CancellationToken cancellationToken)
@@ -78,6 +80,16 @@ namespace Leaguelane.Service.Services
             {
                 throw ex;
             }
+        }
+
+        public async Task<List<League>> GetAllActiveLeaguesByIds(List<int> ids, CancellationToken cancellationToken)
+        {
+            return (await _repository.FindAllAsync<League>(x => ids.Contains(x.ApiLeagueId), cancellationToken)).ToList();
+        }
+
+        public async Task<League> GetLeagueByApiIdAsync(int id, CancellationToken cancellationToken)
+        {
+            return await _repository.FirstOrDefaultAsync<League>(x => x.ApiLeagueId == id, cancellationToken);
         }
     }
 }

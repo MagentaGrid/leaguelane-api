@@ -63,5 +63,104 @@ namespace Leaguelane.ApiService.Mappers
                 ApiFixtureId = dto.FixtureId
             };
         }
+
+        public static List<FixtureApiResponseDto> MapToApiResponseDto(List<Fixture> fixtures
+            , List<Leaguelane.Persistence.Entities.Venue> venues
+            , List<Leaguelane.Persistence.Entities.Team> teams
+            , List<Leaguelane.Persistence.Entities.League> leagues)
+        {
+           var fixtureResponse = new List<FixtureApiResponseDto>();
+
+            foreach (Fixture fixture in fixtures)
+            {
+                var venue = venues.FirstOrDefault(v => v.ApiVenueId == fixture.VenueId);
+                var homeTeam = teams.FirstOrDefault(t => t.ApiTeamId == fixture.HomeTeamId);
+                var awayTeam = teams.FirstOrDefault(t => t.ApiTeamId == fixture.AwayTeamId);
+                var league = leagues.FirstOrDefault(l => l.ApiLeagueId == fixture.LeagueId);
+                fixtureResponse.Add(new FixtureApiResponseDto
+                {
+                    FixtureId = fixture.FixtureId,
+                    Date = fixture.Date,
+                    Time = fixture.Time,
+                    GoalsHome = fixture.GoalsHome,
+                    GoalsAway = fixture.GoalsAway,
+                    Status = fixture.Status,
+                    ApiFixtureId= fixture.ApiFixtureId,
+                    AwayTeamId= fixture.AwayTeamId,
+                    AwayTeamName= awayTeam?.Name,
+                    HomeTeamId= fixture?.HomeTeamId,
+                    HomeTeamName= homeTeam?.Name,
+                    VenueId= fixture?.VenueId,
+                    VenueName= venue?.Name,
+                    LeagueId= fixture.LeagueId,
+                    LeagueName= league?.Name,
+                    SeasonId= fixture.SeasonId,
+                    PublishStatus= fixture.PublishStatus,
+                    Rank= fixture.Rank,
+                    RoundId= fixture.RoundId,
+                    SportId= fixture.SportId,
+                    Timezone= fixture.Timezone,
+                });
+            }
+
+            return fixtureResponse;
+        }
+
+        public static FixtureDetailsApiResponseDto FixtureDetailsApiResponseDto(Fixture fixture
+            , List<Leaguelane.Persistence.Entities.Team> teams
+            , League? league
+            , Persistence.Entities.Venue? venue)
+        {
+            var homeTeam = teams.FirstOrDefault(t => t.ApiTeamId == fixture.HomeTeamId);
+            var awayTeam = teams.FirstOrDefault(t => t.ApiTeamId == fixture.AwayTeamId);
+            var preview = fixture.FixturePreviews.FirstOrDefault(p => p.FixtureId == fixture.FixtureId);
+            return new FixtureDetailsApiResponseDto
+            {
+                FixtureId = fixture.FixtureId,
+                Date = fixture.Date,
+                Time = fixture.Time,
+                GoalsHome = fixture.GoalsHome,
+                GoalsAway = fixture.GoalsAway,
+                Status = fixture.Status,
+                ApiFixtureId = fixture.ApiFixtureId,
+                AwayTeamId = fixture.AwayTeamId,
+                AwayTeamName = awayTeam?.Name,
+                HomeTeamId = fixture?.HomeTeamId,
+                HomeTeamName = homeTeam?.Name,
+                VenueId = fixture?.VenueId,
+                LeagueId = fixture.LeagueId,
+                VenueName = venue?.Name,
+                LeagueName = league?.Name,
+                SeasonId = fixture.SeasonId,
+                PublishStatus = fixture.PublishStatus,
+                Rank = fixture.Rank,
+                RoundId = fixture.RoundId,
+                SportId = fixture.SportId,
+                Timezone = fixture.Timezone,
+                Tips = fixture.FixtureTips != null ? fixture.FixtureTips.Select(t => new TipsResponse
+                {
+                    FixtureTipId = t.FixtureTipId,
+                    FixtureId = t.FixtureId,
+                    BetId = t.BetId,
+                    BookmakerId = t.BookmakerId,
+                    IsSaved = t.IsSaved,
+                    IsVisible = t.IsVisible,
+                    OddsValueId = t.OddsValueId,
+                    Reasoning = t.Reasoning,
+                    Title = t.Title,
+                    BetName = t.Bet?.Name,
+                    BookmakerName = t.Bookmaker?.Name,
+                    OddsValueName = t.OddsValue?.Label
+                }).ToList() : null,
+                Preview = preview != null ? new PreviewResponse
+                {
+                    FixturePreviewId = preview.FixturePreviewId,
+                    FixtureId = preview.FixtureId,
+                    FullAnalysis = preview.FullAnalysis,
+                    Headline = preview.Headline,
+                    ShortIntro = preview.ShortIntro
+                } : null
+            };
+        }
     }
 }

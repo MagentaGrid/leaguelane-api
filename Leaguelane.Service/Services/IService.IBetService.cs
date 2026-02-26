@@ -7,5 +7,6 @@ namespace Leaguelane.Service.Services
     public interface IBetService
     {
         Task<bool> GetAllBetsAsync(CancellationToken cancellationToken);
+        Task<List<Leaguelane.Persistence.Entities.Bet>> GetAllBets(CancellationToken cancellationToken);
     }
 }

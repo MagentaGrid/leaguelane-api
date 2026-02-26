@@ -18,14 +18,16 @@ namespace Leaguelane.Service.Services
         private readonly string _endpoint;
         private readonly string _apiHost;
         private readonly string _apiKey;
+        private readonly IRepository _repository;
 
-        public BetService(IBetRepository betRepository, IConfiguration configuration)
+        public BetService(IBetRepository betRepository, IConfiguration configuration, IRepository repository)
         {
             _betRepository = betRepository;
             _baseUrl = configuration["FootballApi:BaseUrl"];
             _endpoint = "/odds/bets"; // or configuration["FootballApi:BetsEndpoint"];
             _apiHost = configuration["FootballApi:ApiHost"];
             _apiKey = configuration["FootballApi:ApiKey"];
+            _repository = repository;
         }
 
         public async Task<bool> GetAllBetsAsync(CancellationToken cancellationToken)
@@ -51,7 +53,7 @@ namespace Leaguelane.Service.Services
                     {
                         var bets = data.Response.Select(b => new Leaguelane.Persistence.Entities.Bet
                         {
-                            BetId = b.Id,
+                            ApiBetId = b.Id,
                             Name = b.Name,
                             Active = true,
                             Created = DateTime.UtcNow
@@ -65,6 +67,11 @@ namespace Leaguelane.Service.Services
             {
                 return false;
             }
+        }
+
+        public async Task<List<Leaguelane.Persistence.Entities.Bet>> GetAllBets(CancellationToken cancellationToken)
+        {
+            return (await _repository.GetAllAsync<Leaguelane.Persistence.Entities.Bet>()).ToList(); 
         }
     }
 }

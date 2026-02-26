@@ -11,7 +11,7 @@ namespace Leaguelane.Persistence.Entities
         public string Title { get; set; }
         public string? Reasoning { get; set; }
         public int BookmakerId { get; set; }
-        public int OddsId { get; set; }
+        public int OddsValueId { get; set; }
         public int BetId { get; set; }
         public bool IsSaved { get; set; } = true;
         public bool IsVisible { get; set; } = false;
@@ -22,8 +22,8 @@ namespace Leaguelane.Persistence.Entities
         [ForeignKey("BookmakerId")]
         public virtual Bookmaker Bookmaker { get; set; }
 
-        [ForeignKey("OddsId")]
-        public virtual Odd Odds { get; set; }
+        [ForeignKey("OddsValueId")]
+        public virtual OddsValue OddsValue { get; set; }
 
         [ForeignKey("BetId")]
         public virtual Bet Bet { get; set; }

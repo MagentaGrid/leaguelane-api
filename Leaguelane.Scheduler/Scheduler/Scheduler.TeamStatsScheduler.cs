@@ -11,10 +11,12 @@ namespace Leaguelane.Scheduler.Scheduler
     {
         private readonly ITeamStatService _teamStatService;
         private readonly IAuditService _auditService;
-        public TeamStatsScheduler(ITeamStatService teamStatService, IAuditService auditService)
+        private readonly IJobSchedulerService _jobSchedulerService;
+        public TeamStatsScheduler(ITeamStatService teamStatService, IAuditService auditService, IJobSchedulerService jobSchedulerService)
         {
             _teamStatService = teamStatService;
             _auditService = auditService;
+            _jobSchedulerService = jobSchedulerService;
         }
         public async Task Execute(IJobExecutionContext context)
         {
@@ -23,13 +25,16 @@ namespace Leaguelane.Scheduler.Scheduler
             int seasonId = 2019; // as per requirement
             int sportId = 1; // assuming football
             int auditId = await _auditService.AddAuditAsync(Jobs.TeamStat, "TeamStats api scheduler initiated", CancellationToken.None);
+            await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.TeamStat, "InProgress", "Intiated scheduler", CancellationToken.None);
             try
             {
                 await _teamStatService.FetchAndStoreTeamStatsAsync(leagueId, teamId, seasonId, sportId, CancellationToken.None);
+                await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.TeamStat, "Completed", "TeamStats api scheduler completed successfully", CancellationToken.None);
                 await _auditService.UpdateAuditAsync(auditId, "Completed", "TeamStats api scheduler completed successfully", CancellationToken.None);
             }
             catch (Exception ex)
             {
+                await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.TeamStat, "Failed", ex.Message, CancellationToken.None);
                 await _auditService.UpdateAuditAsync(auditId, "Failed", ex.Message, CancellationToken.None);
             }
         }

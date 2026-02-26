@@ -1,6 +1,8 @@
 using Leaguelane.Models.Dtos;
+using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
 using Leaguelane.Repository.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +20,8 @@ namespace Leaguelane.Service.Services
         private readonly string _apiHost;
         private readonly string _apiKey;
         private readonly IFixtureRepository _fixtureRepository;
-        public OddsService(IOddsRepository oddsRepository, IConfiguration configuration, IFixtureRepository fixtureRepository)
+        private readonly LeaguelaneDbContext _context;
+        public OddsService(IOddsRepository oddsRepository, IConfiguration configuration, IFixtureRepository fixtureRepository, LeaguelaneDbContext context)
         {
             _oddsRepository = oddsRepository;
             _oddsRepository = oddsRepository;
@@ -26,6 +29,7 @@ namespace Leaguelane.Service.Services
             _apiHost = configuration["FootballApi:ApiHost"] ?? string.Empty;
             _apiKey = configuration["FootballApi:ApiKey"] ?? string.Empty;
             _fixtureRepository = fixtureRepository;
+            _context = context;
         }
 
         public async Task<List<OddsDto>> GetOddsAsync(int? fixtureId, int? bookmakerId, string? market, int skip, int take, bool onlyActive, CancellationToken cancellationToken)
@@ -148,11 +152,10 @@ namespace Leaguelane.Service.Services
 
         public async Task FetchAndStoreOddsAsync(Persistence.Entities.Fixture fixture, CancellationToken cancellationToken)
         {
-
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{_baseUrl}odds?fixture={fixture.FixtureId}")
+                RequestUri = new Uri($"{_baseUrl}/odds?fixture={fixture.ApiFixtureId}")
             };
             request.Headers.Add("x-rapidapi-host", _apiHost);
             request.Headers.Add("x-rapidapi-key", _apiKey);
@@ -170,6 +173,8 @@ namespace Leaguelane.Service.Services
                     {
                         foreach (var bet in bookmaker.Bets)
                         {
+                            if(await _oddsRepository.IsOddExistsAsync(fixture.FixtureId, bookmaker.Id, bet.Id, cancellationToken)) continue;
+
                             var odd = new Odd
                             {
                                 FixtureId = fixture.FixtureId,
@@ -201,6 +206,16 @@ namespace Leaguelane.Service.Services
                     }
                 }
             }
+        }
+
+        public async Task<Odd> GetOddsByBetAndBookmakerIdAsync(int betTypeId, int bookmakerId, int fixtureId, CancellationToken cancellationToken)
+        {
+            return await _context.Odds.Include(x => x.OddsValues).Where(x => x.BetTypeId == betTypeId && x.BookmakerId == bookmakerId && x.FixtureId == fixtureId).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        public async Task<bool> IsOddExistsAsync(int fixtureId, CancellationToken cancellationToken)
+        {
+            return await _context.Odds.AnyAsync(x => x.FixtureId == fixtureId, cancellationToken);
         }
     }
 }

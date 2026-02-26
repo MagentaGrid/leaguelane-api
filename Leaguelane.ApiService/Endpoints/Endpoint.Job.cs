@@ -1,6 +1,7 @@
 ﻿using Leaguelane.ApiService.Feature;
 using Leaguelane.ApiService.Handlers;
 using Leaguelane.Constants.Enums;
+using Leaguelane.Enums.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,9 @@ namespace Leaguelane.ApiService.Endpoints
         {
             group.MapGet("", GetJobs).WithName("job-list")
                 .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
+            group.MapPatch("scheduler", Schedule).WithName("job-scheduler")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
             return group;
         }
 
@@ -21,21 +25,9 @@ namespace Leaguelane.ApiService.Endpoints
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> ScheduleSeason(ISender sender, CancellationToken cancellationToken)
+        public static async Task<IResult> Schedule([FromServices] IJobSchedulerFeatureService jobSchedulerFeatureService, [FromQuery]Jobs job, CancellationToken cancellationToken)
         {
-            var result = await sender.Send(new SeasonScheduerCommand(), cancellationToken);
-            return TypedResults.Ok(result);
-        }
-
-        public static async Task<IResult> ScheduleCountry(ISender sender, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new CountrySchedulerCommand(), cancellationToken);
-            return TypedResults.Ok(result);
-        }
-
-        public static async Task<IResult> ScheduleLeague(ISender sender, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new LeagueSchedulerCommand(), cancellationToken);
+            var result = await jobSchedulerFeatureService.TriggerJob(job, cancellationToken);
             return TypedResults.Ok(result);
         }
     }

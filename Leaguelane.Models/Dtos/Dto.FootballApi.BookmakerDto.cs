@@ -1,12 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace Leaguelane.Models.Dtos
 {
     public class BookmakerDto
     {
+        [JsonPropertyName("id")]
         public int Id { get; set; }
-        public int? ApiBookMakerId { get; set; }
+        [JsonPropertyName("name")]
         public string Name { get; set; } = string.Empty;
-        public string? AffiliateLink { get; set; }
-        public string? BookieLogo { get; set; }
-        public bool? Active { get; set; }
     }
 }

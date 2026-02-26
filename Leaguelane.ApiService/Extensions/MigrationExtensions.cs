@@ -280,8 +280,18 @@ public static class MigrationExtensions
         },
         new()
         {
-            JobScheduelerId = Jobs.Odds,
-            Name = "Odds",
+            JobScheduelerId = Jobs.Bet,
+            Name = "Bets",
+            RunStatus = "",
+            LastRun = null,
+            NextRun = null,
+            RunBy = "System",
+            Status = ""
+        },
+        new()
+        {
+            JobScheduelerId = Jobs.Bookmaker,
+            Name = "Bookmaker",
             RunStatus = "",
             LastRun = null,
             NextRun = null,

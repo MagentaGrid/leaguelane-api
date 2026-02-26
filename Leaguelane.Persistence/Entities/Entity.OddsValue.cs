@@ -13,6 +13,9 @@ namespace Leaguelane.Persistence.Entities
         [MaxLength(100)]
         public string Label { get; set; }
         [Required]
-        public decimal Odd { get; set; }
+        public string Odd { get; set; }
+
+        [ForeignKey("OddsId")]
+        public virtual Odd Odds { get; set; }
     }
 }

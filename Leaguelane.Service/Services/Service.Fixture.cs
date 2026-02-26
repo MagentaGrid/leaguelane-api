@@ -1,6 +1,8 @@
 ﻿using Leaguelane.Models.Dtos;
+using Leaguelane.Persistence.Context;
 using Leaguelane.Persistence.Entities;
 using Leaguelane.Repository.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -22,8 +24,13 @@ namespace Leaguelane.Service.Services
         private readonly IFixtureRepository _fixtureRepository;
         private readonly ILeagueRepository _leagueRepository;
         private readonly IRepository _repository;
+        private readonly LeaguelaneDbContext _context;
 
-        public FixtureService(IConfiguration configuration, ILeagueRepository leagueRepository, IFixtureRepository fixtureRepository, IRepository repository)
+        public FixtureService(IConfiguration configuration
+            , ILeagueRepository leagueRepository
+            , IFixtureRepository fixtureRepository
+            , IRepository repository
+            , LeaguelaneDbContext context)
         {
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? throw new ArgumentNullException("BaseUrl");
             _apiHost = configuration["FootballApi:ApiHost"] ?? throw new ArgumentNullException("ApiHost");
@@ -31,6 +38,7 @@ namespace Leaguelane.Service.Services
             _fixtureRepository = fixtureRepository;
             _leagueRepository = leagueRepository;
             _repository = repository;
+            _context = context;
         }
         public async Task GetAllFixtures(CancellationToken cancellationToken)
         {
@@ -105,7 +113,7 @@ namespace Leaguelane.Service.Services
             var totalCount = fixtures.Count();
 
             var data = fixtures
-                .OrderByDescending(x => x.Date)
+                .OrderBy(x => x.Date)
                 .Skip((page - 1) * pagesize)
                 .Take(pagesize).ToList();
 
@@ -114,7 +122,15 @@ namespace Leaguelane.Service.Services
 
         public async Task<Fixture> GetFixtureByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await _fixtureRepository.GetFixtureByIdAsync(id, cancellationToken);
+            return await _context.Fixtures
+                .Include(x => x.FixturePreviews)
+                .Include(x => x.FixtureTips)
+                    .ThenInclude(t => t.OddsValue)
+                .Include(x => x.FixtureTips)
+                    .ThenInclude(t => t.Bookmaker)
+                .Include(x => x.FixtureTips)
+                    .ThenInclude(t => t.Bet)
+                .FirstOrDefaultAsync(x => x.FixtureId == id, cancellationToken);
         }
 
         public async Task UpdateFixtureAsync(Fixture fixture, CancellationToken cancellationToken)
@@ -163,6 +179,40 @@ namespace Leaguelane.Service.Services
         public async Task<int> GetMissingPreviewsCountAsync(CancellationToken cancellationToken)
         {
             return await _repository.CountAsync<Fixture>(x => x.Date.HasValue && x.Date >= DateTime.UtcNow && !x.FixturePreviews.Any(), cancellationToken);
+        }
+
+        public async Task<bool> PublishFixture(int fixtureId, CancellationToken cancellationToken)
+        {
+            var fixture = await _repository.GetByIdAsync<Fixture>(fixtureId, cancellationToken);
+
+            if (fixture == null)
+            {
+                throw new Exception("Fixture not found");
+            }
+
+            fixture.PublishStatus = true;
+
+            _repository.Update(fixture);
+            await _repository.SaveChangesAsync<Fixture>(cancellationToken);
+
+            return true;
+        }
+
+        public async Task<bool> UnPublishFixture(int fixtureId, CancellationToken cancellationToken)
+        {
+            var fixture = await _repository.GetByIdAsync<Fixture>(fixtureId, cancellationToken);
+
+            if (fixture == null)
+            {
+                throw new Exception("Fixture not found");
+            }
+
+            fixture.PublishStatus = false;
+
+            _repository.Update(fixture);
+            await _repository.SaveChangesAsync<Fixture>(cancellationToken);
+
+            return true;
         }
     }
 }

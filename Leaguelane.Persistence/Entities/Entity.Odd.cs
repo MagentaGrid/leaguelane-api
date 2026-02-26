@@ -22,5 +22,7 @@ namespace Leaguelane.Persistence.Entities
         public int BetTypeId { get; set; }
         [Required]
         public DateTime LastUpdated { get; set; }
+
+        public ICollection<OddsValue> OddsValues { get; set; }
     }
 }

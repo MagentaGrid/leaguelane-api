@@ -1,6 +1,9 @@
 using Leaguelane.Models.Dtos;
 using MediatR;
 using Leaguelane.ApiService.Handlers;
+using Microsoft.AspNetCore.Mvc;
+using Leaguelane.ApiService.Feature;
+using Leaguelane.Constants.Enums;
 
 namespace Leaguelane.ApiService.Endpoints
 {
@@ -8,55 +11,33 @@ namespace Leaguelane.ApiService.Endpoints
     {
         public static RouteGroupBuilder AddOddsRoutes(this RouteGroupBuilder group)
         {
-            group.MapGet("", GetOdds).WithName("odds-list");
-            group.MapGet("all", GetAllOdds).WithName("odds-list-all");
-            group.MapGet("{id:int}", GetOddsById).WithName("odds-by-id");
-            group.MapPut("{id:int}", UpdateOdds).WithName("odds-update");
-            group.MapPut("{id:int}/delete", SoftDeleteOdds).WithName("odds-delete");
-            group.MapPut("{id:int}/restore", RestoreOdds).WithName("odds-restore");
-            group.MapGet("deleted", GetDeletedOdds).WithName("odds-deleted");
+            group.MapGet("", GetOddsForDropdown).WithName("odds-list")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
+            group.MapGet("bookmakers", GetBookmakersForDropdown).WithName("odds-bookmakers")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
+            group.MapGet("bets", GetBetsForDropdown).WithName("odds-bets")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
             return group;
         }
 
-        public static async Task<IResult> GetOdds(ISender sender, int? fixtureId, int? bookmakerId, string? market, int skip = 0, int take = 20, CancellationToken cancellationToken = default)
+        public static async Task<IResult> GetOddsForDropdown([FromServices]IOddFeatureService oddFeatureService, [FromQuery] int betId, [FromQuery] int bookmakerId, [FromQuery] int fixtureId, CancellationToken cancellationToken = default)
         {
-            var result = await sender.Send(new GetOddsQuery(fixtureId, bookmakerId, market, skip, take), cancellationToken);
+            var result = await oddFeatureService.GetAllOddsForBetAndBookmaker(betId, bookmakerId, fixtureId, cancellationToken);
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> GetAllOdds(ISender sender, CancellationToken cancellationToken)
+        public static async Task<IResult> GetBookmakersForDropdown([FromServices] IOddFeatureService oddFeatureService, CancellationToken cancellationToken = default)
         {
-            var result = await sender.Send(new GetAllOddsQuery(), cancellationToken);
+            var result = await oddFeatureService.GetAllBookmakers(cancellationToken);
             return TypedResults.Ok(result);
         }
 
-        public static async Task<IResult> GetOddsById(ISender sender, int id, CancellationToken cancellationToken)
+        public static async Task<IResult> GetBetsForDropdown([FromServices] IOddFeatureService oddFeatureService, CancellationToken cancellationToken = default)
         {
-            var result = await sender.Send(new GetOddsByIdQuery(id), cancellationToken);
-            return TypedResults.Ok(result);
-        }
-
-        public static async Task<IResult> UpdateOdds(ISender sender, int id, OddsDto odds, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new UpdateOddsCommand(id, odds), cancellationToken);
-            return TypedResults.Ok(result);
-        }
-
-        public static async Task<IResult> SoftDeleteOdds(ISender sender, int id, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new SoftDeleteOddsCommand(id), cancellationToken);
-            return TypedResults.Ok(result);
-        }
-
-        public static async Task<IResult> RestoreOdds(ISender sender, int id, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new RestoreOddsCommand(id), cancellationToken);
-            return TypedResults.Ok(result);
-        }
-
-        public static async Task<IResult> GetDeletedOdds(ISender sender, CancellationToken cancellationToken)
-        {
-            var result = await sender.Send(new GetDeletedOddsQuery(), cancellationToken);
+            var result = await oddFeatureService.GetAllBets(cancellationToken);
             return TypedResults.Ok(result);
         }
     }

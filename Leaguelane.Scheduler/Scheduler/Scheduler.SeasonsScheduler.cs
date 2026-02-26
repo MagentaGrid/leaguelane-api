@@ -13,21 +13,26 @@ namespace Leaguelane.Scheduler.Scheduler
     {
         private readonly ISeasonService _seasonService;
         private readonly IAuditService _auditService;
-        public SeasonsScheduler(ISeasonService seasonService, IAuditService auditService)
+        private readonly IJobSchedulerService _jobSchedulerService;
+        public SeasonsScheduler(ISeasonService seasonService, IAuditService auditService, IJobSchedulerService jobSchedulerService)
         {
             _seasonService = seasonService;
             _auditService = auditService;
+            _jobSchedulerService = jobSchedulerService;
         }
         public async Task Execute(IJobExecutionContext context)
         {
             int auditId = await _auditService.AddAuditAsync(Jobs.Season, "Season api scheduler initiated", CancellationToken.None);
+            await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.Season, "InProgress", "Intiated scheduler", CancellationToken.None);
             try
             {
                 await _seasonService.GetAllSeasons(CancellationToken.None);
+                await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.Season, "Completed", "Season api scheduler completed successfully", CancellationToken.None);
                 await _auditService.UpdateAuditAsync(auditId, "Completed", "Season api scheduler completed successfully", CancellationToken.None);
             }
             catch (Exception ex)
             {
+                await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.Season, "Failed", ex.Message, CancellationToken.None);
                 await _auditService.UpdateAuditAsync(auditId, "Failed", ex.Message, CancellationToken.None);
             }
         }

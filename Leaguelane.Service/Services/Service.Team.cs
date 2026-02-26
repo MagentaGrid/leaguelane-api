@@ -25,8 +25,9 @@ namespace Leaguelane.Service.Services
         private readonly string _baseUrl;
         private readonly string _apiHost;
         private readonly string _apiKey;
+        private readonly IRepository _repository;
 
-        public TeamService(ITeamRepository teamRepository, IVenueRepository venueRepository, IConfiguration configuration, ISeasonRepository seasonRepository, ILeagueRepository leagueRepository)
+        public TeamService(ITeamRepository teamRepository, IVenueRepository venueRepository, IConfiguration configuration, ISeasonRepository seasonRepository, ILeagueRepository leagueRepository, IRepository repository)
         {
             _teamRepository = teamRepository;
             _venueRepository = venueRepository;
@@ -35,6 +36,7 @@ namespace Leaguelane.Service.Services
             _apiKey = configuration["FootballApi:ApiKey"] ?? string.Empty;
             _seasonRepository = seasonRepository;
             _leagueRepository = leagueRepository;
+            _repository = repository;
         }
 
         public async Task FetchAndStoreTeamsAndVenuesAsync(int leagueId, int seasonId, int sportId, CancellationToken cancellationToken)
@@ -110,19 +112,22 @@ namespace Leaguelane.Service.Services
         public async Task ImportAllTeams(CancellationToken cancellationToken)
         {
             var leagues = await _leagueRepository.GetAllActiveLeagues(cancellationToken);
-            var seasons = await _seasonRepository.GetAllSeasons(cancellationToken);
+            //var seasons = await _seasonRepository.GetAllSeasons(cancellationToken);
             foreach (var league in leagues)
             {
-                foreach (var season in seasons)
-                {
-                    await FetchAndStoreTeamsAndVenuesAsync(league.ApiLeagueId, season.Year, 1, cancellationToken);
-                }
+                await FetchAndStoreTeamsAndVenuesAsync(league.ApiLeagueId, league.CurrentSeason, 1, cancellationToken);
+
             }
         }
 
         public async Task<Dictionary<int, PersistenceTeam>> GetAllTeamsById(IEnumerable<int> teamIds, CancellationToken cancellationToken)
         {
             return await _teamRepository.GetAllTeamsById(teamIds, cancellationToken);
+        }
+
+        public async Task<List<PersistenceTeam>> GetAllTeamsByIds(List<int> teamIds, CancellationToken cancellationToken)
+        {
+            return (await _repository.FindAllAsync<PersistenceTeam>(x => teamIds.Contains(x.ApiTeamId), cancellationToken)).ToList();
         }
     }
 }
