@@ -69,6 +69,9 @@ app.UseRouting(); // <- add this
 //app.UseCors("AllowAll");
 app.UseCors("AllowFrontendLocalhost");
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
