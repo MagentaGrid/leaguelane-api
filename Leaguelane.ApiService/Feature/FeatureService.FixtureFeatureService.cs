@@ -116,5 +116,34 @@ namespace Leaguelane.ApiService.Feature
 
             return new BaseResponse(true, "Fixture fetched successfully", FixtureMapper.FixtureDetailsApiResponseDto(fixture, teams, league, venue));
         }
+
+        public async Task<BaseResponse> GetFeaturedPredictions(int count, CancellationToken cancellationToken)
+        {
+            var (fixtures, totalCount) = await _fixtureService.GetAllFixturesAsync(1, count, true, cancellationToken);
+
+            if (fixtures == null || !fixtures.Any())
+                return new BaseResponse(true, "No predictions found", new { predictions = new List<Prediction>() });
+
+            var homeTeamIds = fixtures.Where(x => x.HomeTeamId != null).Select(x => (int)x.HomeTeamId).Distinct().ToList();
+            var awayTeamIds = fixtures.Where(x => x.AwayTeamId != null).Select(x => (int)x.AwayTeamId).Distinct().ToList();
+
+            var teams = await _teamService.GetAllTeamsByIds(homeTeamIds.Concat(awayTeamIds).Distinct().ToList(), cancellationToken);
+
+            var predictions = fixtures.Select(f =>
+            {
+                var home = teams.FirstOrDefault(t => t.ApiTeamId == f.HomeTeamId);
+                var away = teams.FirstOrDefault(t => t.ApiTeamId == f.AwayTeamId);
+
+                return new Prediction
+                {
+                    Home = home == null ? null : new PredictionTeam { Team = home.Name, LogoUrl = home.LogoUrl },
+                    Away = away == null ? null : new PredictionTeam { Team = away.Name, LogoUrl = away.LogoUrl },
+                    Time = f.Date?.ToString("HH:mm") ?? string.Empty,
+                    Day = f.Date?.ToString("ddd") ?? string.Empty
+                };
+            }).ToList();
+
+            return new BaseResponse(true, "Predictions fetched successfully", new { predictions });
+        }
     }
 }
