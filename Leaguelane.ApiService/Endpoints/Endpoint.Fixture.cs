@@ -11,8 +11,8 @@ namespace Leaguelane.ApiService.Endpoints
     {
         public static RouteGroupBuilder AddFixtureRoutes(this RouteGroupBuilder group)
         {
-            group.MapGet("", GetFixtures).WithName("fixtures")
-                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+            group.MapGet("", GetFixtures).WithName("fixtures");
+                //.RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
 
             group.MapGet("{id:int}", GetFixtureById).WithName("fixture-by-id")
                 .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
