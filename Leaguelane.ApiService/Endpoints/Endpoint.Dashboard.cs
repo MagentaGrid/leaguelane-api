@@ -10,8 +10,8 @@ namespace Leaguelane.ApiService.Endpoints
     {
         public static RouteGroupBuilder AddDashboardRoutes(this RouteGroupBuilder group)
         {
-            group.MapGet("", GetDashboard).WithName("dashboard-list");
-                //.RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+            group.MapGet("", GetDashboard).WithName("dashboard-list")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
 
             return group;
         }
