@@ -113,4 +113,18 @@ namespace Leaguelane.Models.Dtos
     {
 
     }
+
+    public class PredictionTeam
+    {
+        public string Team { get; set; } = string.Empty;
+        public string? LogoUrl { get; set; }
+    }
+
+    public class Prediction
+    {
+        public PredictionTeam? Home { get; set; }
+        public PredictionTeam? Away { get; set; }
+        public string Time { get; set; } = string.Empty;
+        public string Day { get; set; } = string.Empty;
+    }
 }
