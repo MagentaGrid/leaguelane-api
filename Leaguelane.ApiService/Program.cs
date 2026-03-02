@@ -5,6 +5,8 @@ using Leaguelane.Persistence.Context;
 using Leaguelane.Scheduler;
 using Leaguelane.ApiService.Middlewears;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +31,12 @@ builder.Services.AddSwaggerGen(options =>
         Title = "LL API",
         Version = "v1"
     });
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
 });
 
 

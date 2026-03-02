@@ -161,9 +161,23 @@ namespace Leaguelane.Service.Services
             }).ToList();
         }
 
-        public async Task<List<Fixture>> GetAllFixturesWithPaginationAsync(int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<(List<Fixture>, int)> GetAllFixturesWithPaginationAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
-            return await _fixtureRepository.GetAllFixturesWithPaginationAsync(page, pageSize, cancellationToken);
+            // Get fixtures from now into the future that are published
+            var predicate = (Func<Fixture, bool>)(x => x.Date.HasValue && x.Date.Value >= DateTime.UtcNow && x.PublishStatus);
+
+            // Use repository to get IQueryable then count and page
+            var fixturesQuery = await _repository.FindAllAsync<Fixture>(x => x.Date.HasValue && x.Date >= DateTime.UtcNow && x.PublishStatus, cancellationToken);
+
+            var totalCount = fixturesQuery.Count();
+
+            var data = fixturesQuery
+                .OrderBy(x => x.Date)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (data, totalCount);
         }
 
         public async Task<int> GetUpcomingFixturesCountAsync(CancellationToken cancellationToken)

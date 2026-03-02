@@ -35,6 +35,123 @@ namespace Leaguelane.ApiService.Feature
             _serviceScopeFactory = serviceScopeFactory;
         }
 
+        public async Task<BaseResponse> GetPredictions(string league, int page, int pageSize, CancellationToken cancellationToken)
+        {
+            var (fixtures, totalCount) = await _fixtureService.GetAllFixturesWithPaginationAsync(page, pageSize, cancellationToken);
+
+            if (fixtures == null || !fixtures.Any())
+            {
+                var emptyData = new PredictionsData
+                {
+                    League = league,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalLeagues = 0,
+                    TotalMatches = 0,
+                    LeagueFilter = new List<int>(),
+                    Leagues = new List<LeaguePrediction>()
+                };
+
+                return new BaseResponse(true, "Predictions fetched successfully", emptyData);
+            }
+
+            // load related data
+            var leagueIds = fixtures.Select(x => x.LeagueId).Distinct().ToList();
+            var leagues = await _leagueService.GetAllActiveLeaguesByIds(leagueIds, cancellationToken);
+
+            var homeTeamIds = fixtures.Where(x => x.HomeTeamId != null).Select(x => (int)x.HomeTeamId).Distinct().ToList();
+            var awayTeamIds = fixtures.Where(x => x.AwayTeamId != null).Select(x => (int)x.AwayTeamId).Distinct().ToList();
+            var teams = await _teamService.GetAllTeamsByIds(homeTeamIds.Concat(awayTeamIds).Distinct().ToList(), cancellationToken);
+
+            var venueIds = fixtures.Where(x => x.VenueId != null).Select(x => (int)x.VenueId).Distinct().ToList();
+            var venues = await _venueService.GetAllVenues(venueIds, cancellationToken);
+
+            var grouped = fixtures.GroupBy(f => f.LeagueId);
+
+            var leaguePredictions = new List<LeaguePrediction>();
+
+            foreach (var g in grouped)
+            {
+                var leagueEntity = leagues.FirstOrDefault(l => l.ApiLeagueId == g.Key);
+                var lp = new LeaguePrediction
+                {
+                    LeagueId = leagueEntity?.ApiLeagueId.ToString() ?? g.Key.ToString(),
+                    LeagueKey = (leagueEntity?.Name ?? "").ToLowerInvariant().Replace(" ", "-"),
+                    LeagueName = leagueEntity?.Name ?? string.Empty,
+                    LeagueLogoUrl = leagueEntity?.LogoUrl,
+                    MatchdayLabel = "Matchday 9 of 38",
+                    TableUrl = $"/leagues/{leagueEntity?.ApiLeagueId ?? g.Key}/table",
+                    Matches = g.Select(f =>
+                    {
+                        var home = teams.FirstOrDefault(t => t.ApiTeamId == f.HomeTeamId);
+                        var away = teams.FirstOrDefault(t => t.ApiTeamId == f.AwayTeamId);
+                        var venue = venues.FirstOrDefault(v => v.ApiVenueId == f.VenueId);
+
+                        string homeCode = "D";
+                        string awayCode = "D";
+                        if (f.GoalsHome.HasValue && f.GoalsAway.HasValue)
+                        {
+                            if (f.GoalsHome > f.GoalsAway) { homeCode = "W"; awayCode = "L"; }
+                            else if (f.GoalsHome < f.GoalsAway) { homeCode = "L"; awayCode = "W"; }
+                            else { homeCode = awayCode = "D"; }
+                        }
+
+                        var homeTeam = new TeamSummary
+                        {
+                            Id = home?.ApiTeamId.ToString() ?? (f.HomeTeamId?.ToString() ?? string.Empty),
+                            Name = home?.Name ?? string.Empty,
+                            LogoUrl = home?.LogoUrl,
+                            Form = new List<FormItem>
+                            {
+                                new FormItem { Code = homeCode, ColorHex = homeCode == "D" ? "#6B7280" : "#28A745" },
+                                new FormItem { Code = homeCode, ColorHex = homeCode == "D" ? "#6B7280" : "#28A745" },
+                                new FormItem { Code = homeCode, ColorHex = homeCode == "D" ? "#6B7280" : "#28A745" }
+                            }
+                        };
+
+                        var awayTeam = new TeamSummary
+                        {
+                            Id = away?.ApiTeamId.ToString() ?? (f.AwayTeamId?.ToString() ?? string.Empty),
+                            Name = away?.Name ?? string.Empty,
+                            LogoUrl = away?.LogoUrl,
+                            Form = new List<FormItem>
+                            {
+                                new FormItem { Code = awayCode, ColorHex = awayCode == "D" ? "#6B7280" : "#28A745" },
+                                new FormItem { Code = awayCode, ColorHex = awayCode == "D" ? "#6B7280" : "#28A745" },
+                                new FormItem { Code = awayCode, ColorHex = awayCode == "D" ? "#6B7280" : "#28A745" }
+                            }
+                        };
+
+                        return new MatchSummary
+                        {
+                            FixtureId = f.ApiFixtureId.ToString(),
+                            Time = f.Date?.ToString("HH:mm") ?? string.Empty,
+                            Day = f.Date?.ToString("ddd") ?? string.Empty,
+                            Venue = venue?.Name ?? string.Empty,
+                            Broadcaster = string.Empty,
+                            HomeTeam = homeTeam,
+                            AwayTeam = awayTeam
+                        };
+                    }).ToList()
+                };
+
+                leaguePredictions.Add(lp);
+            }
+
+            var data = new PredictionsData
+            {
+                League = league,
+                Page = page,
+                PageSize = pageSize,
+                TotalLeagues = leaguePredictions.Count,
+                TotalMatches = totalCount,
+                LeagueFilter = fixtures.Select(x => x.LeagueId).Distinct().ToList(),
+                Leagues = leaguePredictions
+            };
+
+            return new BaseResponse(true, "Predictions fetched successfully", data);
+        }
+
         public async Task<PaginationBaseResponse> GetFixtures(int page, int pageSize,CancellationToken cancellationToken)
         {
             var (fixtures, totalCount) = await _fixtureService.GetAllFixturesAsync(page, pageSize,false, cancellationToken);

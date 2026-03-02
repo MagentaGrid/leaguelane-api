@@ -102,15 +102,17 @@ namespace Leaguelane.Repository.Repositories
 
         public async Task<List<Fixture>> GetFixturesForNextFourteenDaysAsync(CancellationToken cancellationToken)
         {
+            var now = DateTime.UtcNow;
             return await _context.Fixtures
-                .Where(f => f.Date >= DateTime.Now && f.Date <= DateTime.Now.AddDays(14) && f.Active == true)
+                .Where(f => f.Date >= now && f.Date <= now.AddDays(14) && f.Active == true)
                 .OrderByDescending(f => f.Date)
                 .ToListAsync(cancellationToken);
         }
 
         public async Task<List<Fixture>> GetAllFixturesWithPaginationAsync(int page, int pageSize, CancellationToken cancellationToken)
         {
-            return await _context.Fixtures.Where(f => f.Active == true && f.Date != null && f.Date.Value >= DateTime.Now.Date)
+            var now = DateTime.UtcNow;
+            return await _context.Fixtures.Where(f => f.Active == true && f.Date != null && f.Date.Value >= now)
                 .OrderByDescending(f => f.Date)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
