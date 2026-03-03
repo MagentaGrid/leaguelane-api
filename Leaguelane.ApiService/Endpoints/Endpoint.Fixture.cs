@@ -29,6 +29,12 @@ namespace Leaguelane.ApiService.Endpoints
             group.MapPost("preview", CreatePreview).WithName("fixture-preview-create")
                 .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
 
+            group.MapPut("tip", UpdateTip).WithName("fixture-tip-update")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
+            group.MapDelete("tip", DeleleteTip).WithName("fixture-tip-delete")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
             //group.MapPut("{id:int}/rank", SetRank).WithName("fixture-set-rank");
             //group.MapGet("latest", GetLatestFixtures).WithName("fixtures-latest");
             return group;
@@ -67,6 +73,18 @@ namespace Leaguelane.ApiService.Endpoints
         public static async Task<IResult> CreatePreview([FromServices] IFixtureFeatureService fixtureFeatureService, [FromBody] PreviewRequestDto previewRequestDto, CancellationToken cancellationToken)
         {
             var result = await fixtureFeatureService.CreatePreview(previewRequestDto, cancellationToken);
+            return TypedResults.Ok(result);
+        }
+
+        public static async Task<IResult> UpdateTip([FromServices] IFixtureFeatureService fixtureFeatureService, [FromBody] TipUpdateRequestDto tipRequestDto, CancellationToken cancellationToken)
+        {
+            var result = await fixtureFeatureService.UpdateTip(tipRequestDto, cancellationToken);
+            return TypedResults.Ok(result);
+        }
+
+        public static async Task<IResult> DeleleteTip([FromServices] IFixtureFeatureService fixtureFeatureService, [FromQuery] int tipId, CancellationToken cancellationToken)
+        {
+            var result = await fixtureFeatureService.DeleleteTip(tipId, cancellationToken);
             return TypedResults.Ok(result);
         }
     }

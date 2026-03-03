@@ -116,5 +116,19 @@ namespace Leaguelane.ApiService.Feature
 
             return new BaseResponse(true, "Fixture fetched successfully", FixtureMapper.FixtureDetailsApiResponseDto(fixture, teams, league, venue));
         }
+
+        public async Task<BaseResponse> DeleleteTip(int tipId, CancellationToken cancellationToken)
+        {
+            await _tipService.DeleteTipAsync(tipId, cancellationToken);
+
+            return new BaseResponse(true, "Tip deleted successfully", true);
+        }
+
+        public async Task<BaseResponse> UpdateTip(TipUpdateRequestDto tipRequestDto, CancellationToken cancellationToken)
+        {
+            await _tipService.UpdateTipAsync(tipRequestDto, cancellationToken);
+
+            return new BaseResponse(true, "Tip updated successfully", true);
+        }
     }
 }

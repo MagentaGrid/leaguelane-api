@@ -15,4 +15,9 @@
         public bool IsSaved { get; set; } = true;
         public bool IsVisible { get; set; } = false;
     }
+
+    public class TipUpdateRequestDto: TipRequestDto
+    {
+        public int FixtureTipId { get; set; }
+    }
 }
