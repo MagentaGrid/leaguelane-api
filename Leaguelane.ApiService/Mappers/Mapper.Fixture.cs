@@ -100,6 +100,8 @@ namespace Leaguelane.ApiService.Mappers
                     RoundId= fixture.RoundId,
                     SportId= fixture.SportId,
                     Timezone= fixture.Timezone,
+                    IsPreviewAdded= fixture.FixturePreviews.Any(p => p.FixtureId == fixture.FixtureId && p.Active == true),
+                    IsTipAdded= fixture.FixtureTips.Any(t => t.FixtureId == fixture.FixtureId && t.Active == true),
                 });
             }
 
@@ -137,7 +139,7 @@ namespace Leaguelane.ApiService.Mappers
                 RoundId = fixture.RoundId,
                 SportId = fixture.SportId,
                 Timezone = fixture.Timezone,
-                Tips = fixture.FixtureTips != null ? fixture.FixtureTips.Select(t => new TipsResponse
+                Tips = fixture.FixtureTips != null ? fixture.FixtureTips.Where(t => t.Active == true).Select(t => new TipsResponse
                 {
                     FixtureTipId = t.FixtureTipId,
                     FixtureId = t.FixtureId,

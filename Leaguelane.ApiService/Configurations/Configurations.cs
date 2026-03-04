@@ -92,6 +92,9 @@ namespace Leaguelane.Api.Configurations
             //Register preview service
             services.AddScoped<IPreviewService, PreviewService>();
 
+            //Register article service
+            services.AddScoped<IArticleService, ArticleService>();
+
             return services;
         }
 
@@ -175,6 +178,9 @@ namespace Leaguelane.Api.Configurations
 
             //Register odds feature services
             services.AddScoped<IOddFeatureService, OddFeatureService>();
+
+            //Register article feature services
+            services.AddScoped<IArticleFeatureService, ArticleFeatureService>();
 
             return services;
         }

@@ -35,6 +35,7 @@ public class LeaguelaneDbContext : DbContext
     public DbSet<FixturePreview> FixturePreviews => Set<FixturePreview>();
     public DbSet<FixtureTip> FixtureTips => Set<FixtureTip>();
     public DbSet<JobSchedueler> JobScheduelers => Set<JobSchedueler>();
+    public DbSet<Article> Articles => Set<Article>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

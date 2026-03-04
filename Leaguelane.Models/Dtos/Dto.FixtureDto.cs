@@ -62,6 +62,8 @@ namespace Leaguelane.Models.Dtos
         public int? Rank { get; set; } // For ranking fixtures
         public int ApiFixtureId { get; set; }
         public bool PublishStatus { get; set; }
+        public bool IsTipAdded { get; set; }
+        public bool IsPreviewAdded { get; set; }
     }
 
     public class FixtureDetailsApiResponseDto: FixtureApiResponseDto

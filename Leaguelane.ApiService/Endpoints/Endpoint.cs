@@ -17,6 +17,7 @@ namespace Leaguelane.ApiService.Endpoints
             app.MapGroup("/dashboard").AddDashboardRoutes().WithTags("Dashboard").WithName("Dashboard");
             app.MapGroup("/odds").AddOddsRoutes().WithTags("Odds").WithName("Odds");
             app.MapGroup("/predictions").AddPredictionRoutes().WithTags("Predictions").WithName("Predictions");
+            app.MapGroup("/articles").AddArticleRoutes().WithName("Articles").WithTags("Article");
         }
     }
 }

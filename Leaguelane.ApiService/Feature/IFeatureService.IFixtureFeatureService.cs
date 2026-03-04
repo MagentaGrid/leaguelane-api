@@ -10,6 +10,8 @@ namespace Leaguelane.ApiService.Feature
         Task<BaseResponse> CreateTips(TipRequestDto tipRequestDto, CancellationToken cancellationToken);
         Task<BaseResponse> CreatePreview(PreviewRequestDto previewRequestDto, CancellationToken cancellationToken);
         Task<BaseResponse> GetFixtureDetailsById(int fixtureId, CancellationToken cancellationToken);
+        Task<BaseResponse> UpdateTip(TipUpdateRequestDto tipRequestDto, CancellationToken cancellationToken);
+        Task<BaseResponse> DeleleteTip(int tipId, CancellationToken cancellationToken);
         Task<BaseResponse> GetFeaturedPredictions(int count, CancellationToken cancellationToken);
         Task<BaseResponse> GetPredictions(string league, int page, int pageSize, CancellationToken cancellationToken);
     }

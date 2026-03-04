@@ -14,6 +14,19 @@ namespace Leaguelane.Service.Services
 
         public async Task<FixturePreview> AddPreviewAsync(FixturePreview fixturePreview, CancellationToken cancellationToken)
         {
+            if(await _repository.ExistsAsync<FixturePreview>(x => x.FixtureId == fixturePreview.FixtureId, cancellationToken))
+            {
+                var preview = await _repository.FirstOrDefaultAsync<FixturePreview>(x => x.FixtureId == fixturePreview.FixtureId, cancellationToken);
+
+                preview.FullAnalysis = fixturePreview.FullAnalysis;
+                preview.ShortIntro = fixturePreview.ShortIntro;
+                preview.Headline = fixturePreview.Headline;
+
+                _repository.Update(preview);
+                await _repository.SaveChangesAsync<FixturePreview>(cancellationToken);
+                return preview;
+            }
+
             await _repository.AddAsync<FixturePreview>(fixturePreview,cancellationToken);
             await _repository.SaveChangesAsync<FixturePreview>(cancellationToken);
             return fixturePreview;

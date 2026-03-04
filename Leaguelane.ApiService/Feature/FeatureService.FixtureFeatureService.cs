@@ -262,5 +262,19 @@ namespace Leaguelane.ApiService.Feature
 
             return new BaseResponse(true, "Predictions fetched successfully", new { predictions });
         }
+
+        public async Task<BaseResponse> DeleleteTip(int tipId, CancellationToken cancellationToken)
+        {
+            await _tipService.DeleteTipAsync(tipId, cancellationToken);
+
+            return new BaseResponse(true, "Tip deleted successfully", true);
+        }
+
+        public async Task<BaseResponse> UpdateTip(TipUpdateRequestDto tipRequestDto, CancellationToken cancellationToken)
+        {
+            await _tipService.UpdateTipAsync(tipRequestDto, cancellationToken);
+
+            return new BaseResponse(true, "Tip updated successfully", true);
+        }
     }
 }
