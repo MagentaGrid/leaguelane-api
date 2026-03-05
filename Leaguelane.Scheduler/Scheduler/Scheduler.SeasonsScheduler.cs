@@ -22,12 +22,12 @@ namespace Leaguelane.Scheduler.Scheduler
         }
         public async Task Execute(IJobExecutionContext context)
         {
-            int auditId = await _auditService.AddAuditAsync(Jobs.Season, "Season api scheduler initiated", CancellationToken.None);
+            int auditId = await _auditService.AddAuditAsync(Jobs.Season, "Intiated scheduler", CancellationToken.None);
             await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.Season, "InProgress", "Intiated scheduler", CancellationToken.None);
             try
             {
                 await _seasonService.GetAllSeasons(CancellationToken.None);
-                await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.Season, "Completed", "Season api scheduler completed successfully", CancellationToken.None);
+                await _jobSchedulerService.UpdateJobSchedulerStatus(Jobs.Season, "Completed", "Completed scheduler", CancellationToken.None);
                 await _auditService.UpdateAuditAsync(auditId, "Completed", "Season api scheduler completed successfully", CancellationToken.None);
             }
             catch (Exception ex)

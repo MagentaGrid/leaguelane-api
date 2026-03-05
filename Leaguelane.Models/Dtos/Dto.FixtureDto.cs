@@ -70,9 +70,9 @@ namespace Leaguelane.Models.Dtos
     {
         public List<TipsResponse>? Tips { get; set; } = new List<TipsResponse>(); // For ranking fixtures>
         public PreviewResponse? Preview { get; set; } = new PreviewResponse();
-        public List<StatsResponse>? HomeTeamStats { get; set; } = new List<StatsResponse>();
-        public List<StatsResponse>? AwayTeamStats { get; set; } = new List<StatsResponse>();
-        public List<H2HResponse>? H2H { get; set; } = new List<H2HResponse>();
+        public TeamStatApiResponseDto? HomeTeamStats { get; set; }
+        public TeamStatApiResponseDto? AwayTeamStats { get; set; }
+        public List<H2HFixtureResponse>? H2H { get; set; } = new List<H2HFixtureResponse>();
     }
 
     public class TipsResponse

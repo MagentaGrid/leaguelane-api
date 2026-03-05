@@ -21,7 +21,8 @@ namespace Leaguelane.Service.Services
         private readonly string _apiKey;
         private readonly IFixtureRepository _fixtureRepository;
         private readonly LeaguelaneDbContext _context;
-        public OddsService(IOddsRepository oddsRepository, IConfiguration configuration, IFixtureRepository fixtureRepository, LeaguelaneDbContext context)
+        private readonly IExternalApiErrorService _externalApiErrorService;
+        public OddsService(IOddsRepository oddsRepository, IConfiguration configuration, IFixtureRepository fixtureRepository, LeaguelaneDbContext context, IExternalApiErrorService externalApiErrorService)
         {
             _oddsRepository = oddsRepository;
             _oddsRepository = oddsRepository;
@@ -30,6 +31,7 @@ namespace Leaguelane.Service.Services
             _apiKey = configuration["FootballApi:ApiKey"] ?? string.Empty;
             _fixtureRepository = fixtureRepository;
             _context = context;
+            _externalApiErrorService = externalApiErrorService;
         }
 
         public async Task<List<OddsDto>> GetOddsAsync(int? fixtureId, int? bookmakerId, string? market, int skip, int take, bool onlyActive, CancellationToken cancellationToken)
@@ -161,50 +163,63 @@ namespace Leaguelane.Service.Services
             request.Headers.Add("x-rapidapi-key", _apiKey);
 
             using var response = await _httpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            var apiResponse = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<OddsApiResponseDto>>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            if (apiResponse?.Response != null)
+            try
             {
-                foreach (var oddsDto in apiResponse.Response)
+                response.EnsureSuccessStatusCode();
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                var apiResponse = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<OddsApiResponseDto>>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (apiResponse?.Response != null)
                 {
-                    foreach (var bookmaker in oddsDto.Bookmakers)
+                    foreach (var oddsDto in apiResponse.Response)
                     {
-                        foreach (var bet in bookmaker.Bets)
+                        foreach (var bookmaker in oddsDto.Bookmakers)
                         {
-                            if(await _oddsRepository.IsOddExistsAsync(fixture.FixtureId, bookmaker.Id, bet.Id, cancellationToken)) continue;
-
-                            var odd = new Odd
+                            foreach (var bet in bookmaker.Bets)
                             {
-                                FixtureId = fixture.FixtureId,
-                                LeagueId = fixture.LeagueId,
-                                SeasonId = fixture.SeasonId,
-                                SportId = fixture.SportId ?? 0,
-                                BookmakerId = bookmaker.Id,
-                                BetTypeId = bet.Id,
-                                LastUpdated = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-                                Created = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
-                                Active = true
-                            };
-                            int oddId = await _oddsRepository.AddOrUpdateOddAsync(odd, cancellationToken);
+                                if (await _oddsRepository.IsOddExistsAsync(fixture.FixtureId, bookmaker.Id, bet.Id, cancellationToken)) continue;
 
-                            var values = new List<OddsValue>();
-                            foreach (var value in bet.Values)
-                            {
-                                values.Add(new OddsValue
+                                var odd = new Odd
                                 {
-                                    OddsId = oddId,
-                                    Label = value.Label,
-                                    Odd = value.Odd,
-                                    Created = DateTime.UtcNow,
+                                    FixtureId = fixture.FixtureId,
+                                    LeagueId = fixture.LeagueId,
+                                    SeasonId = fixture.SeasonId,
+                                    SportId = fixture.SportId ?? 0,
+                                    BookmakerId = bookmaker.Id,
+                                    BetTypeId = bet.Id,
+                                    LastUpdated = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
+                                    Created = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc),
                                     Active = true
-                                });
+                                };
+                                int oddId = await _oddsRepository.AddOrUpdateOddAsync(odd, cancellationToken);
+
+                                var values = new List<OddsValue>();
+                                foreach (var value in bet.Values)
+                                {
+                                    values.Add(new OddsValue
+                                    {
+                                        OddsId = oddId,
+                                        Label = value.Label,
+                                        Odd = value.Odd,
+                                        Created = DateTime.UtcNow,
+                                        Active = true
+                                    });
+                                }
+                                await _oddsRepository.AddOrUpdateOddsValuesAsync(values, cancellationToken);
                             }
-                            await _oddsRepository.AddOrUpdateOddsValuesAsync(values, cancellationToken);
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                    , request.ToString()
+                    , response.ToString()
+                    , DateTime.UtcNow
+                    , request.Method.Method
+                    , request.RequestUri.AbsoluteUri
+                    , cancellationToken);
             }
         }
 

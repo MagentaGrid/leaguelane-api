@@ -15,13 +15,15 @@ namespace Leaguelane.Service.Services
         private readonly string _endpoint;
         private readonly string _apiHost;
         private readonly string _apiKey;
-        public CountryService(IConfiguration configuration, ICountryRepository countryRepository)
+        private readonly IExternalApiErrorService _externalApiErrorService;
+        public CountryService(IConfiguration configuration, ICountryRepository countryRepository, IExternalApiErrorService externalApiErrorService)
         {
             _baseUrl = configuration["FootballApi:BaseUrl"];
             _endpoint = configuration["FootballApi:SeasonsEndpoint"];
             _apiHost = configuration["FootballApi:ApiHost"];
             _apiKey = configuration["FootballApi:ApiKey"];
             _countryRepository = countryRepository;
+            _externalApiErrorService = externalApiErrorService;
         }
         public async Task<bool> GetAllCountriesAsync(CancellationToken cancellationToken)
         {
@@ -38,29 +40,43 @@ namespace Leaguelane.Service.Services
             {
                 using (var response = await _httpClient.SendAsync(request, cancellationToken))
                 {
-                    response.EnsureSuccessStatusCode();
-                    var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    try
+                    {
+                        response.EnsureSuccessStatusCode();
+                        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
-                    var data = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<CountryDto>>>(responseBody);
+                        var data = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<CountryDto>>>(responseBody);
 
-                    var countries = data.Response.Select(c => new Country 
-                    { 
-                        Name = c.Name, 
-                        Active = true,
-                        Code = c.Code,
-                        Created = DateTime.UtcNow,
-                        FlagUrl = c.Flag
-                    }).ToList();
+                        var countries = data.Response.Select(c => new Country
+                        {
+                            Name = c.Name,
+                            Active = true,
+                            Code = c.Code,
+                            Created = DateTime.UtcNow,
+                            FlagUrl = c.Flag
+                        }).ToList();
 
-                    await _countryRepository.AddCountries(countries, cancellationToken);
+                        await _countryRepository.AddCountries(countries, cancellationToken);
 
-                    return true;
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                            , request.ToString()
+                            , response.ToString()
+                            , DateTime.UtcNow
+                            , request.Method.Method
+                            , request.RequestUri.AbsoluteUri
+                            , cancellationToken);
+                        throw;
+                    }
                 }
             }
             catch (HttpRequestException ex)
             {
                 // Log exception here if needed
-                return false;
+                throw;
             }
         }
 

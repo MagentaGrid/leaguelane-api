@@ -14,20 +14,22 @@ namespace Leaguelane.Service.Services
     public class TeamStatService : ITeamStatService
     {
         private readonly ITeamStatRepository _teamStatRepository;
+        private readonly IExternalApiErrorService _externalApiErrorService;
         private readonly HttpClient _httpClient = new HttpClient();
         private readonly string _baseUrl;
         private readonly string _apiHost;
         private readonly string _apiKey;
 
-        public TeamStatService(ITeamStatRepository teamStatRepository, IConfiguration configuration)
+        public TeamStatService(ITeamStatRepository teamStatRepository, IConfiguration configuration, IExternalApiErrorService externalApiErrorService)
         {
             _teamStatRepository = teamStatRepository;
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? string.Empty;
             _apiHost = configuration["FootballApi:ApiHost"] ?? string.Empty;
             _apiKey = configuration["FootballApi:ApiKey"] ?? string.Empty;
+            _externalApiErrorService = externalApiErrorService;
         }
 
-        public async Task FetchAndStoreTeamStatsAsync(int leagueId, int teamId, int seasonId, int sportId, CancellationToken cancellationToken)
+        public async Task<TeamStatApiResponseDto> FetchAndStoreTeamStatsAsync(int leagueId, int teamId, int seasonId, int sportId, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage
             {
@@ -40,65 +42,81 @@ namespace Leaguelane.Service.Services
             try
             {
                 using var response = await _httpClient.SendAsync(request, cancellationToken);
-                response.EnsureSuccessStatusCode();
-                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-                var apiResponse = JsonSerializer.Deserialize<FootballApiBaseResponseDto<TeamStatApiResponseDto>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (apiResponse?.Response != null)
+                try
                 {
-                    var stat = new TeamStat
-                    {
-                        TeamId = teamId,
-                        LeagueId = leagueId,
-                        SeasonId = seasonId,
-                        SportId = sportId,
-                        Created = DateTime.UtcNow,
-                        Active = true
-                    };
-                    int statId = await _teamStatRepository.AddOrUpdateTeamStatAsync(stat, cancellationToken);
+                    response.EnsureSuccessStatusCode();
+                    var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                    var apiResponse = JsonSerializer.Deserialize<FootballApiBaseResponseDto<TeamStatApiResponseDto>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    var fixtures = new List<TeamStatFixture>();
-                    foreach (var kv in apiResponse.Response.Fixtures)
+                    if (apiResponse?.Response != null)
                     {
-                        fixtures.Add(new TeamStatFixture
+                        var stat = new TeamStat
                         {
-                            TeamStatsId = statId,
-                            ResultType = Enum.Parse<TeamStatsResultType>(kv.Key, true),
-                            Home = kv.Value.Home,
-                            Away = kv.Value.Away,
-                            Total = kv.Value.Total
-                        });
-                    }
-                    await _teamStatRepository.AddOrUpdateTeamStatFixturesAsync(fixtures, cancellationToken);
+                            TeamId = teamId,
+                            LeagueId = leagueId,
+                            SeasonId = seasonId,
+                            SportId = sportId,
+                            Created = DateTime.UtcNow,
+                            Active = true
+                        };
+                        int statId = await _teamStatRepository.AddOrUpdateTeamStatAsync(stat, cancellationToken);
 
-                    var goals = new List<TeamStatGoal>();
-                    foreach (var type in new[] { "for", "against" })
-                    {
-                        var goalType = Enum.Parse<TeamStatsGoalType>(type == "for" ? "for" : "against", true);
-                        foreach (var metric in new[] { "total", "average" })
+                        var fixtures = new List<TeamStatFixture>();
+                        foreach (var kv in apiResponse.Response.Fixtures)
                         {
-                            var goalMetric = Enum.Parse<TeamStatsGoalMetric>(metric, true);
-                            var goalData = type == "for" ? apiResponse.Response.Goals.For : apiResponse.Response.Goals.Against;
-                            var metricData = metric == "total"
-                                ? goalData.Total
-                                : new TeamStatGoalMetricTotalDto
-                                {
-                                    Home = string.IsNullOrEmpty(goalData.Average.Home) ? 0 : decimal.Parse(goalData.Average.Home),
-                                    Away = string.IsNullOrEmpty(goalData.Average.Away) ? 0 : decimal.Parse(goalData.Average.Away),
-                                    Total = string.IsNullOrEmpty(goalData.Average.Total) ? 0 : decimal.Parse(goalData.Average.Total),
-                                };
-                            goals.Add(new TeamStatGoal
+                            fixtures.Add(new TeamStatFixture
                             {
                                 TeamStatsId = statId,
-                                Type = goalType,
-                                Metric = goalMetric,
-                                Home = metricData.Home,
-                                Away = metricData.Away,
-                                Total = metricData.Total,
+                                ResultType = Enum.Parse<TeamStatsResultType>(kv.Key, true),
+                                Home = kv.Value.Home,
+                                Away = kv.Value.Away,
+                                Total = kv.Value.Total
                             });
                         }
+                        await _teamStatRepository.AddOrUpdateTeamStatFixturesAsync(fixtures, cancellationToken);
+
+                        var goals = new List<TeamStatGoal>();
+                        foreach (var type in new[] { "for", "against" })
+                        {
+                            var goalType = Enum.Parse<TeamStatsGoalType>(type == "for" ? "for" : "against", true);
+                            foreach (var metric in new[] { "total", "average" })
+                            {
+                                var goalMetric = Enum.Parse<TeamStatsGoalMetric>(metric, true);
+                                var goalData = type == "for" ? apiResponse.Response.Goals.For : apiResponse.Response.Goals.Against;
+                                var metricData = metric == "total"
+                                    ? goalData.Total
+                                    : new TeamStatGoalMetricTotalDto
+                                    {
+                                        Home = string.IsNullOrEmpty(goalData.Average.Home) ? 0 : decimal.Parse(goalData.Average.Home),
+                                        Away = string.IsNullOrEmpty(goalData.Average.Away) ? 0 : decimal.Parse(goalData.Average.Away),
+                                        Total = string.IsNullOrEmpty(goalData.Average.Total) ? 0 : decimal.Parse(goalData.Average.Total),
+                                    };
+                                goals.Add(new TeamStatGoal
+                                {
+                                    TeamStatsId = statId,
+                                    Type = goalType,
+                                    Metric = goalMetric,
+                                    Home = metricData.Home,
+                                    Away = metricData.Away,
+                                    Total = metricData.Total,
+                                });
+                            }
+                        }
+                        await _teamStatRepository.AddOrUpdateTeamStatGoalsAsync(goals, cancellationToken);
                     }
-                    await _teamStatRepository.AddOrUpdateTeamStatGoalsAsync(goals, cancellationToken);
+
+                    return apiResponse.Response;
+                }
+                catch (Exception ex)
+                {
+                    await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                        , request.ToString()
+                        , response.ToString()
+                        , DateTime.UtcNow
+                        , request.Method.Method
+                        , request.RequestUri.AbsoluteUri
+                        , cancellationToken);
+                    throw;
                 }
             }
             catch (Exception ex)

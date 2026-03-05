@@ -16,6 +16,8 @@ namespace Leaguelane.ApiService.Feature
         private readonly IPreviewService _previewService;
         private readonly IOddsService _oddsService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IH2HService _h2hService;
+        private readonly ITeamStatService _teamStatService;
         public FixtureFeatureService(IFixtureService fixtureService
             , IVenueService venueService
             , ITeamService teamService
@@ -23,7 +25,9 @@ namespace Leaguelane.ApiService.Feature
             , ITipService tipService
             , IPreviewService previewService
             , IOddsService oddsService
-            , IServiceScopeFactory serviceScopeFactory)
+            , IServiceScopeFactory serviceScopeFactory
+            , IH2HService h2hService
+            , ITeamStatService teamStatService)
         {
             _fixtureService = fixtureService;
             _venueService = venueService;
@@ -33,6 +37,8 @@ namespace Leaguelane.ApiService.Feature
             _previewService = previewService;
             _oddsService = oddsService;
             _serviceScopeFactory = serviceScopeFactory;
+            _h2hService = h2hService;
+            _teamStatService = teamStatService;
         }
 
         public async Task<BaseResponse> GetPredictions(string league, int page, int pageSize, CancellationToken cancellationToken)
@@ -231,7 +237,15 @@ namespace Leaguelane.ApiService.Feature
             var league = await _leagueService.GetLeagueByApiIdAsync(fixture.LeagueId, cancellationToken);
             var venue = await _venueService.GetVenueByApiId(fixture.VenueId ?? 0, cancellationToken);
 
-            return new BaseResponse(true, "Fixture fetched successfully", FixtureMapper.FixtureDetailsApiResponseDto(fixture, teams, league, venue));
+            var data = FixtureMapper.FixtureDetailsApiResponseDto(fixture, teams, league, venue);
+
+            data.H2H = await _h2hService.GetH2H(fixture.HomeTeamId ?? 0, fixture.AwayTeamId ?? 0, cancellationToken);
+
+            data.AwayTeamStats = await _teamStatService.FetchAndStoreTeamStatsAsync(fixture.LeagueId, fixture.AwayTeamId ?? 0, fixture.SeasonId, 1, cancellationToken);
+
+            data.HomeTeamStats = await _teamStatService.FetchAndStoreTeamStatsAsync(fixture.LeagueId, fixture.HomeTeamId ?? 0, fixture.SeasonId, 1, cancellationToken);
+
+            return new BaseResponse(true, "Fixture fetched successfully", data);
         }
 
         public async Task<BaseResponse> GetFeaturedPredictions(int count, CancellationToken cancellationToken)
