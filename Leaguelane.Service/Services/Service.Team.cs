@@ -26,8 +26,9 @@ namespace Leaguelane.Service.Services
         private readonly string _apiHost;
         private readonly string _apiKey;
         private readonly IRepository _repository;
+        private readonly IExternalApiErrorService _externalApiErrorService;
 
-        public TeamService(ITeamRepository teamRepository, IVenueRepository venueRepository, IConfiguration configuration, ISeasonRepository seasonRepository, ILeagueRepository leagueRepository, IRepository repository)
+        public TeamService(ITeamRepository teamRepository, IVenueRepository venueRepository, IConfiguration configuration, ISeasonRepository seasonRepository, ILeagueRepository leagueRepository, IRepository repository, IExternalApiErrorService externalApiErrorService)
         {
             _teamRepository = teamRepository;
             _venueRepository = venueRepository;
@@ -37,6 +38,7 @@ namespace Leaguelane.Service.Services
             _seasonRepository = seasonRepository;
             _leagueRepository = leagueRepository;
             _repository = repository;
+            _externalApiErrorService = externalApiErrorService;
         }
 
         public async Task FetchAndStoreTeamsAndVenuesAsync(int leagueId, int seasonId, int sportId, CancellationToken cancellationToken)
@@ -50,62 +52,76 @@ namespace Leaguelane.Service.Services
             request.Headers.Add("x-rapidapi-key", _apiKey);
 
             using var response = await _httpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            var apiResponse = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<TeamApiResponseDto>>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            var teams = new List<PersistenceTeam>();
-            var venues = new List<PersistenceVenue>();
-            if (apiResponse?.Response != null && apiResponse?.Response?.Count > 0)
+            try
             {
-                foreach (var item in apiResponse.Response)
-                {
-                    var team = new PersistenceTeam
-                    {
-                        ApiTeamId = item.Team.Id,
-                        Name = item.Team.Name,
-                        Code = item.Team.Code,
-                        Country = item.Team.Country,
-                        Founded = item.Team.Founded,
-                        National = item.Team.National,
-                        LogoUrl = item.Team.Logo,
-                        SportId = sportId,
-                        LeagueId = leagueId,
-                        SeasonId = seasonId,
-                        Created = DateTime.UtcNow,
-                        Active = true
-                    };
-                    teams.Add(team);
+                response.EnsureSuccessStatusCode();
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                var apiResponse = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<TeamApiResponseDto>>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                    if (item.Venue != null && item?.Venue.Id != null)
+                var teams = new List<PersistenceTeam>();
+                var venues = new List<PersistenceVenue>();
+                if (apiResponse?.Response != null && apiResponse?.Response?.Count > 0)
+                {
+                    foreach (var item in apiResponse.Response)
                     {
-                        venues.Add(new PersistenceVenue
+                        var team = new PersistenceTeam
                         {
-                            ApiVenueId = item.Venue.Id ?? 0,
-                            Name = item.Venue.Name ?? "",
-                            Address = item.Venue.Address,
-                            City = item.Venue.City,
-                            Capacity = item.Venue.Capacity,
-                            Surface = item.Venue.Surface,
-                            ImageUrl = item.Venue.Image,
+                            ApiTeamId = item.Team.Id,
+                            Name = item.Team.Name,
+                            Code = item.Team.Code,
+                            Country = item.Team.Country,
+                            Founded = item.Team.Founded,
+                            National = item.Team.National,
+                            LogoUrl = item.Team.Logo,
                             SportId = sportId,
                             LeagueId = leagueId,
                             SeasonId = seasonId,
-                            TeamId = team.Id, // Will be set after team is saved if needed
                             Created = DateTime.UtcNow,
                             Active = true
-                        });
+                        };
+                        teams.Add(team);
+
+                        if (item.Venue != null && item?.Venue.Id != null)
+                        {
+                            venues.Add(new PersistenceVenue
+                            {
+                                ApiVenueId = item.Venue.Id ?? 0,
+                                Name = item.Venue.Name ?? "",
+                                Address = item.Venue.Address,
+                                City = item.Venue.City,
+                                Capacity = item.Venue.Capacity,
+                                Surface = item.Venue.Surface,
+                                ImageUrl = item.Venue.Image,
+                                SportId = sportId,
+                                LeagueId = leagueId,
+                                SeasonId = seasonId,
+                                TeamId = team.Id, // Will be set after team is saved if needed
+                                Created = DateTime.UtcNow,
+                                Active = true
+                            });
+                        }
                     }
+                    await _teamRepository.AddOrUpdateTeamsAsync(teams, cancellationToken);
+                    // After teams are saved, update TeamId in venues if needed
+                    foreach (var venue in venues)
+                    {
+                        var team = teams.FirstOrDefault(t => t.ApiTeamId == venue.ApiVenueId);
+                        if (team != null)
+                            venue.TeamId = team.Id;
+                    }
+                    await _venueRepository.AddOrUpdateVenuesAsync(venues, cancellationToken);
                 }
-                await _teamRepository.AddOrUpdateTeamsAsync(teams, cancellationToken);
-                // After teams are saved, update TeamId in venues if needed
-                foreach (var venue in venues)
-                {
-                    var team = teams.FirstOrDefault(t => t.ApiTeamId == venue.ApiVenueId);
-                    if (team != null)
-                        venue.TeamId = team.Id;
-                }
-                await _venueRepository.AddOrUpdateVenuesAsync(venues, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                    , request.ToString()
+                    , response.ToString()
+                    , DateTime.UtcNow
+                    , request.Method.Method
+                    , request.RequestUri.AbsoluteUri
+                    , cancellationToken);
+                throw;
             }
         }
 

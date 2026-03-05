@@ -16,12 +16,13 @@ namespace Leaguelane.Service.Services
         private readonly HttpClient _httpClient = new HttpClient();
         private readonly ILeagueRepository _leagueRepository;
         private readonly IRepository _repository;
+        private readonly IExternalApiErrorService _externalApiErrorService;
 
         private readonly string _baseUrl;
         private readonly string _apiHost;
         private readonly string _apiKey;
 
-        public LeagueService(IConfiguration configuration, ILeagueRepository leagueRepository, IRepository repository)
+        public LeagueService(IConfiguration configuration, ILeagueRepository leagueRepository, IRepository repository, IExternalApiErrorService externalApiErrorService)
         {
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? throw new ArgumentNullException("BaseUrl");
             _apiHost = configuration["FootballApi:ApiHost"] ?? throw new ArgumentNullException("ApiHost");
@@ -29,6 +30,7 @@ namespace Leaguelane.Service.Services
 
             _leagueRepository = leagueRepository;
             _repository = repository;
+            _externalApiErrorService = externalApiErrorService;
         }
 
         public async Task<bool> GetAllLeaguesAsync(CancellationToken cancellationToken)
@@ -45,29 +47,43 @@ namespace Leaguelane.Service.Services
             try
             {
                 using var response = await _httpClient.SendAsync(request, cancellationToken);
-                response.EnsureSuccessStatusCode();
-
-                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-                var data = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<LeagueResponseDto>>>(
-                    responseBody,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (data != null && data.Response != null && data.Response.Count > 0)
+                try
                 {
-                    var leagues = data.Response.Select(l => new League
-                    {
-                        Name = l.League.Name,
-                        Active = true,
-                        Created = DateTime.UtcNow,
-                        LogoUrl = l.League.Logo,
-                        ApiLeagueId = l.League.Id,
-                        Type = l.League.Type,
-                        CurrentSeason = l.Seasons.Where(s => s.Current == true).Select(s => s.Year).FirstOrDefault(),
-                        CountryCode = l.Country.Code,
-                    }).ToList();
+                    response.EnsureSuccessStatusCode();
 
-                    await _leagueRepository.AddLeagues(leagues, cancellationToken);
+                    var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                    var data = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<LeagueResponseDto>>>(
+                        responseBody,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (data != null && data.Response != null && data.Response.Count > 0)
+                    {
+                        var leagues = data.Response.Select(l => new League
+                        {
+                            Name = l.League.Name,
+                            Active = true,
+                            Created = DateTime.UtcNow,
+                            LogoUrl = l.League.Logo,
+                            ApiLeagueId = l.League.Id,
+                            Type = l.League.Type,
+                            CurrentSeason = l.Seasons.Where(s => s.Current == true).Select(s => s.Year).FirstOrDefault(),
+                            CountryCode = l.Country.Code,
+                        }).ToList();
+
+                        await _leagueRepository.AddLeagues(leagues, cancellationToken);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                        , request.ToString()
+                        , response.ToString()
+                        , DateTime.UtcNow
+                        , request.Method.Method
+                        , request.RequestUri.AbsoluteUri
+                        , cancellationToken);
+                    return false;
                 }
 
                 return true;

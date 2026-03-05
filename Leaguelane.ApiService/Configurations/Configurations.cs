@@ -95,6 +95,9 @@ namespace Leaguelane.Api.Configurations
             //Register article service
             services.AddScoped<IArticleService, ArticleService>();
 
+            //Register external api error service
+            services.AddScoped<IExternalApiErrorService, ExternalApiErrorService>();
+
             return services;
         }
 
@@ -158,6 +161,9 @@ namespace Leaguelane.Api.Configurations
 
             //Register bet repositories
             services.AddScoped<IBetRepository, BetRepository>();
+
+            //Register logging repositories
+            services.AddScoped<ILoggingRepository, LoggingRepository>();
 
             return services;
         }
