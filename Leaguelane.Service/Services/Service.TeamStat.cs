@@ -29,7 +29,7 @@ namespace Leaguelane.Service.Services
             _externalApiErrorService = externalApiErrorService;
         }
 
-        public async Task FetchAndStoreTeamStatsAsync(int leagueId, int teamId, int seasonId, int sportId, CancellationToken cancellationToken)
+        public async Task<TeamStatApiResponseDto> FetchAndStoreTeamStatsAsync(int leagueId, int teamId, int seasonId, int sportId, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage
             {
@@ -104,6 +104,8 @@ namespace Leaguelane.Service.Services
                         }
                         await _teamStatRepository.AddOrUpdateTeamStatGoalsAsync(goals, cancellationToken);
                     }
+
+                    return apiResponse.Response;
                 }
                 catch (Exception ex)
                 {

@@ -98,6 +98,9 @@ namespace Leaguelane.Api.Configurations
             //Register external api error service
             services.AddScoped<IExternalApiErrorService, ExternalApiErrorService>();
 
+            //Register H2H service
+            services.AddScoped<IH2HService, H2HService>();
+
             return services;
         }
 
