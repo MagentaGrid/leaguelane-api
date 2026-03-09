@@ -9,7 +9,7 @@ namespace Leaguelane.Service.Services
     public interface IFixtureService
     {
         Task GetAllFixtures(CancellationToken cancellationToken);
-        Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, CancellationToken cancellationToken);
+        Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, int? leagueRank, CancellationToken cancellationToken);
         Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pageSize, bool publishStatus, CancellationToken cancellationToken);
         Task<Fixture> GetFixtureByIdAsync(int id, CancellationToken cancellationToken);
         Task UpdateFixtureAsync(Fixture fixture, CancellationToken cancellationToken);

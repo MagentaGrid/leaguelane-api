@@ -41,11 +41,11 @@ namespace Leaguelane.Service.Services
 
             foreach (var item in leagues)
             {
-                await GetAllFixturesByLeagueAndSeason(item.LeagueId, item.CurrentSeason, cancellationToken);
+                await GetAllFixturesByLeagueAndSeason(item.LeagueId, item.CurrentSeason, item.Rank, cancellationToken);
                 await Task.Delay(500, cancellationToken); // Rate limiting
             }
         }
-        public async Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, CancellationToken cancellationToken)
+        public async Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, int? leagueRank, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage
             {
@@ -87,6 +87,7 @@ namespace Leaguelane.Service.Services
                             AwayTeamId = f.Teams.Away.Id,
                             GoalsHome = f.Goals.Home,
                             GoalsAway = f.Goals.Away,
+                            Rank = leagueRank,
 
                             Created = DateTime.UtcNow,
                             Active = true,
@@ -125,7 +126,8 @@ namespace Leaguelane.Service.Services
             var data = fixtures
                 .Include(x => x.FixturePreviews)
                 .Include(x => x.FixtureTips)
-                .OrderBy(x => x.Date)
+                .OrderBy( x => x.Rank)
+                .ThenBy(x => x.Date)
                 .Skip((page - 1) * pagesize)
                 .Take(pagesize).ToList();
 
