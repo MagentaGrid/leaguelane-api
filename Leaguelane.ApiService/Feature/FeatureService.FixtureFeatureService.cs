@@ -286,5 +286,29 @@ namespace Leaguelane.ApiService.Feature
 
             return new BaseResponse(true, "Tip updated successfully", true);
         }
+
+        public async Task<PaginationBaseResponse> GetFixturesByLeague(int page, int pageSize, int leagueId, CancellationToken cancellationToken)
+        {
+            // 1. Fetch Fixtures (Ensure your FindAllAsync handles Skip/Take at the DB level!)
+            var (fixtures, totalCount) = await _fixtureService.GetAllFixturesByLeagueAsync(page, pageSize, false, leagueId, cancellationToken);
+
+            if (!fixtures.Any()) return new PaginationBaseResponse(true, "No fixtures found", null, page, pageSize, 0, 0); ;
+
+            // 2. Collect unique IDs to avoid fetching duplicates
+            var leagueIds = fixtures.Select(x => (int)x.LeagueId).Distinct().ToList();
+            var teamIds = fixtures.SelectMany(x => new[] { x.HomeTeamId, x.AwayTeamId })
+                                  .Where(id => id.HasValue).Select(id => id.Value).Distinct().ToList();
+            var venueIds = fixtures.Where(x => x.VenueId != null).Select(x => (int)x.VenueId).Distinct().ToList();
+
+            // 3. Fire off DB calls in PARALLEL to save time (Wait for all to finish)
+            var leaguesTask = _leagueService.GetAllActiveLeaguesByIds(leagueIds, cancellationToken);
+            var teamsTask = _teamService.GetAllTeamsByIds(teamIds, cancellationToken);
+            var venuesTask = _venueService.GetAllVenues(venueIds, cancellationToken);
+
+            await Task.WhenAll(leaguesTask, teamsTask, venuesTask);
+
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            return new PaginationBaseResponse(true, "Success", FixtureMapper.MapToApiResponseDto(fixtures, await venuesTask, await teamsTask, await leaguesTask), page, pageSize, totalCount, totalPages);
+        }
     }
 }

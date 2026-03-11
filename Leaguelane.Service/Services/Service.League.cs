@@ -107,5 +107,61 @@ namespace Leaguelane.Service.Services
         {
             return await _repository.FirstOrDefaultAsync<League>(x => x.ApiLeagueId == id, cancellationToken);
         }
+
+        public async Task<bool> UpdateLeagueAsync(UpdateLeagueRequestDto leagueDto, CancellationToken cancellationToken)
+        {
+            var league = await _repository.FirstOrDefaultAsync<League>(x => x.LeagueId == leagueDto.LeagueId, cancellationToken);
+
+            if (league == null)
+                throw new Exception("League not found");
+
+            league.Name = leagueDto.Name;
+            //league.CurrentSeason = leagueDto.CurrentSeason;
+
+            await _repository.UpdateAsync(league);
+            await _repository.SaveChangesAsync<League>(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> DisableLeagueAsync(int id, CancellationToken cancellationToken)
+        {
+            var league = await _repository.FirstOrDefaultAsync<League>(x => x.LeagueId == id, cancellationToken);
+            if (league == null) throw new Exception("League not found");
+            league.Active = false;
+            await _repository.UpdateAsync(league);
+            await _repository.SaveChangesAsync<League>(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> EnableLeagueAsync(int id, CancellationToken cancellationToken)
+        {
+            var league = await _repository.FirstOrDefaultAsync<League>(x => x.LeagueId == id, cancellationToken);
+            if (league == null) throw new Exception("League not found");
+            league.Active = true;
+            await _repository.UpdateAsync(league);
+            await _repository.SaveChangesAsync<League>(cancellationToken);
+            return true;
+        }
+
+        public async Task<(int totalCount, List<League>)> GetAllLeagues(int page, int pageSize, string? search, string status, CancellationToken cancellationToken)
+        {
+            var data = await _repository.GetAllAsync<League>();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                data = data.Where(x => x.Name.ToLower().Contains(search.ToLower()));
+            }
+
+            if (status.ToLower() == "active")
+            {
+                data = data.Where(x => x.Active == true);
+            }
+            else if (status.ToLower() == "inactive")
+            {
+                data = data.Where(x => x.Active == false);
+            }
+
+            return (data.Count(), data.OrderBy(x => x.Rank).Skip((page - 1) * pageSize).Take(pageSize).ToList());
+        }
     }
 }
