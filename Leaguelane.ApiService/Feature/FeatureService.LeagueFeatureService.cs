@@ -12,9 +12,9 @@ namespace Leaguelane.ApiService.Feature
             _leagueService = leagueService;
         }
 
-        public async Task<PaginationBaseResponse> GetAllLeagues(int page, int pageSize, string? search, CancellationToken cancellationToken)
+        public async Task<PaginationBaseResponse> GetAllLeagues(int page, int pageSize, string? search, string status, CancellationToken cancellationToken)
         {
-            var (totalCount, data) = await _leagueService.GetAllLeagues(page, pageSize, search, cancellationToken);
+            var (totalCount, data) = await _leagueService.GetAllLeagues(page, pageSize, search, status, cancellationToken);
 
             return new PaginationBaseResponse(true, "Leagues fetched successfully", data.Select(LeagueMapper.MapToDto).ToList(), page, pageSize, totalCount, (int)Math.Ceiling((double)totalCount / pageSize));
         }

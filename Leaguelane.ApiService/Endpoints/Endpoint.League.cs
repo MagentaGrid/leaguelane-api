@@ -25,9 +25,9 @@ namespace Leaguelane.ApiService.Endpoints
 
             return group;
         }
-        public static async Task<IResult> GetLeagues([FromServices] ILeagueFeatureService leagueFeatureService, [FromQuery]int page = 1, [FromQuery]int pageSize = 10, [FromQuery]string? search = null, CancellationToken cancellationToken = default)
+        public static async Task<IResult> GetLeagues([FromServices] ILeagueFeatureService leagueFeatureService, [FromQuery]int page = 1, [FromQuery]int pageSize = 10, [FromQuery]string? search = null, [FromQuery] string status = "All", CancellationToken cancellationToken = default)
         {
-            var result = await leagueFeatureService.GetAllLeagues(page, pageSize, search, cancellationToken);
+            var result = await leagueFeatureService.GetAllLeagues(page, pageSize, search, status, cancellationToken);
             return TypedResults.Ok(result);
         }
 

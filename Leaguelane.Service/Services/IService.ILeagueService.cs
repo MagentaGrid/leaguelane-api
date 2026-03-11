@@ -15,7 +15,7 @@ namespace Leaguelane.Service.Services
         Task<League> GetLeagueByApiIdAsync(int id, CancellationToken cancellationToken);
         Task<bool> UpdateLeagueAsync(UpdateLeagueRequestDto leagueDto, CancellationToken cancellationToken);
         Task<bool> DisableLeagueAsync(int id, CancellationToken cancellationToken);
-        Task<(int totalCount, List<League>)> GetAllLeagues(int page, int pageSize, string? search, CancellationToken cancellationToken);
+        Task<(int totalCount, List<League>)> GetAllLeagues(int page, int pageSize, string? search, string status, CancellationToken cancellationToken);
         Task<bool> EnableLeagueAsync(int id, CancellationToken cancellationToken);
     }
 }

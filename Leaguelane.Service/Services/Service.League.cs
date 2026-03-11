@@ -143,13 +143,22 @@ namespace Leaguelane.Service.Services
             return true;
         }
 
-        public async Task<(int totalCount, List<League>)> GetAllLeagues(int page, int pageSize, string? search, CancellationToken cancellationToken)
+        public async Task<(int totalCount, List<League>)> GetAllLeagues(int page, int pageSize, string? search, string status, CancellationToken cancellationToken)
         {
             var data = await _repository.GetAllAsync<League>();
 
             if (!string.IsNullOrEmpty(search))
             {
                 data = data.Where(x => x.Name.ToLower().Contains(search.ToLower()));
+            }
+
+            if (status.ToLower() == "active")
+            {
+                data = data.Where(x => x.Active == true);
+            }
+            else if (status.ToLower() == "inactive")
+            {
+                data = data.Where(x => x.Active == false);
             }
 
             return (data.Count(), data.OrderBy(x => x.Rank).Skip((page - 1) * pageSize).Take(pageSize).ToList());
