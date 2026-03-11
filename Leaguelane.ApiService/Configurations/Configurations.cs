@@ -191,6 +191,9 @@ namespace Leaguelane.Api.Configurations
             //Register article feature services
             services.AddScoped<IArticleFeatureService, ArticleFeatureService>();
 
+            //Register league feature services
+            services.AddScoped<ILeagueFeatureService, LeagueFeatureService>();
+
             return services;
         }
     }
