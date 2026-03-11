@@ -23,6 +23,9 @@ namespace Leaguelane.ApiService.Endpoints
             group.MapPatch("enable", Enable).WithName("league-enable")
                 .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
 
+            group.MapGet("fixtures", GetFixtures).WithName("league-fixtures")
+                .RequireAuthorization(policy => policy.RequireRole(UserRole.Admin.ToString(), UserRole.Employee.ToString()));
+
             return group;
         }
         public static async Task<IResult> GetLeagues([FromServices] ILeagueFeatureService leagueFeatureService, [FromQuery]int page = 1, [FromQuery]int pageSize = 10, [FromQuery]string? search = null, [FromQuery] string status = "All", CancellationToken cancellationToken = default)
@@ -46,6 +49,12 @@ namespace Leaguelane.ApiService.Endpoints
         public static async Task<IResult> Enable([FromServices] ILeagueFeatureService leagueFeatureService, [FromQuery] int leagueId, CancellationToken cancellationToken)
         {
             var result = await leagueFeatureService.EnableLeague(leagueId, cancellationToken);
+            return TypedResults.Ok(result);
+        }
+
+        public static async Task<IResult> GetFixtures([FromServices] IFixtureFeatureService fixtureFeatureService, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] int leagueId = 0, [FromQuery] string status = "All", CancellationToken cancellationToken = default)
+        {
+            var result = await fixtureFeatureService.GetFixturesByLeague(page, pageSize, leagueId, cancellationToken);
             return TypedResults.Ok(result);
         }
     }

@@ -242,5 +242,22 @@ namespace Leaguelane.Service.Services
 
             return true;
         }
+
+        public async Task<(List<Fixture>, int)> GetAllFixturesByLeagueAsync(int page, int pagesize, bool publishStatus, int leagueId, CancellationToken cancellationToken)
+        {
+            var fixtures = await _repository.FindAllAsync<Fixture>(x => x.Date >= DateTime.UtcNow && (!publishStatus || x.PublishStatus) && x.LeagueId == leagueId, cancellationToken);
+
+            var totalCount = fixtures.Count();
+
+            var data = fixtures
+                .Include(x => x.FixturePreviews)
+                .Include(x => x.FixtureTips)
+                .OrderBy(x => x.Rank)
+                .ThenBy(x => x.Date)
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize).ToList();
+
+            return (data, totalCount);
+        }
     }
 }
