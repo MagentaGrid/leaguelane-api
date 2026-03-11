@@ -145,5 +145,60 @@ namespace Leaguelane.Service.Services
         {
             return (await _repository.FindAllAsync<PersistenceTeam>(x => teamIds.Contains(x.ApiTeamId), cancellationToken)).ToList();
         }
+
+        public async Task<(int totalCount, List<PersistenceTeam>)> GetAllTeams(int page, int pageSize, string searchText, string status, CancellationToken cancellationToken)
+        {
+            var teams = await _repository.GetAllAsync<PersistenceTeam>();
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                teams = teams.Where(x => x.Name.ToLower().Contains(searchText.ToLower()));
+            }
+
+            if (status.ToLower() == "active")
+            {
+                teams = teams.Where(x => x.Active == true);
+            }
+            else if (status.ToLower() == "inactive")
+            {
+                teams = teams.Where(x => x.Active == false);
+            }
+            return (teams.Count(), teams.OrderBy(x => x.Name).Skip((page - 1) * pageSize).Take(pageSize).ToList());
+        }
+
+        public async Task<PersistenceTeam> GetTeamByIdAsync(int id, CancellationToken cancellationToken)
+        {
+            return await _repository.FirstOrDefaultAsync<PersistenceTeam>(x => x.Id == id, cancellationToken);
+        }
+
+        public async Task<bool> EnableTeamAsync(int id, CancellationToken cancellationToken)
+        {
+            var team = await _repository.FirstOrDefaultAsync<PersistenceTeam>(x => x.Id == id, cancellationToken);
+            if (team == null) throw new Exception("Team not found");
+            team.Active = true;
+            await _repository.UpdateAsync(team);
+            await _repository.SaveChangesAsync<PersistenceTeam>(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> DisableTeamAsync(int id, CancellationToken cancellationToken)
+        {
+            var team = await _repository.FirstOrDefaultAsync<PersistenceTeam>(x => x.Id == id, cancellationToken);
+            if (team == null) throw new Exception("Team not found");
+            team.Active = false;
+            await _repository.UpdateAsync(team);
+            await _repository.SaveChangesAsync<PersistenceTeam>(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> UpdateTeamAsync(TeamUpdateDto teamUpdate, CancellationToken cancellationToken)
+        {
+            var team = await _repository.FirstOrDefaultAsync<PersistenceTeam>(x => x.Id == teamUpdate.Id, cancellationToken);
+            if (team == null) throw new Exception("Team not found");
+            team.DisplayName = teamUpdate.DisplayName;
+            await _repository.UpdateAsync(team);
+            await _repository.SaveChangesAsync<PersistenceTeam>(cancellationToken);
+            return true;
+        }
     }
 }

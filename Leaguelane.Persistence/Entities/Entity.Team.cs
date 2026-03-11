@@ -28,5 +28,6 @@ namespace Leaguelane.Persistence.Entities
         public int LeagueId { get; set; }
         [Required]
         public int SeasonId { get; set; }
+        public string? DisplayName { get; set; }
     }
 }

@@ -194,6 +194,9 @@ namespace Leaguelane.Api.Configurations
             //Register league feature services
             services.AddScoped<ILeagueFeatureService, LeagueFeatureService>();
 
+            //Register team feature services
+            services.AddScoped<ITeamFeatureService, TeamFeatureService>();
+
             return services;
         }
     }
