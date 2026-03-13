@@ -13,9 +13,9 @@ namespace Leaguelane.ApiService.Feature
             _articleService = articleService;
         }
 
-        public async Task<BaseResponse> GetAllArticles(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+        public async Task<BaseResponse> GetAllArticles(int page = 1, int pageSize = 10, string publishtatus = "All", CancellationToken cancellationToken = default)
         {
-            var data = await _articleService.GetArticlesAsync(page, pageSize, cancellationToken);
+            var data = await _articleService.GetArticlesAsync(page, pageSize, publishtatus, cancellationToken);
 
             return new BaseResponse(true, "Articles fetched successfully", data.Select(ArticleMapper.MapToDto).ToList());
         }

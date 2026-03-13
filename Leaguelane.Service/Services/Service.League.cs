@@ -115,7 +115,7 @@ namespace Leaguelane.Service.Services
             if (league == null)
                 throw new Exception("League not found");
 
-            league.Name = leagueDto.Name;
+            league.DisplayName = leagueDto.DisplayName;
             //league.CurrentSeason = leagueDto.CurrentSeason;
 
             await _repository.UpdateAsync(league);

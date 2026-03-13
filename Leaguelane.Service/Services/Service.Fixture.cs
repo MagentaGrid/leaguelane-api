@@ -117,9 +117,18 @@ namespace Leaguelane.Service.Services
             }
         }
 
-        public async Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pagesize, bool publishStatus, CancellationToken cancellationToken)
+        public async Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pagesize, bool publishStatus, CancellationToken cancellationToken, string status = "Active")
         {
             var fixtures = await _repository.FindAllAsync<Fixture>(x => x.Date >= DateTime.UtcNow && (!publishStatus || x.PublishStatus), cancellationToken);
+
+            if (status.ToLower() == "published")
+            {
+                fixtures = fixtures.Where(x => x.PublishStatus == true);
+            }
+            else if (status.ToLower() == "unpublished")
+            {
+                fixtures = fixtures.Where(x => x.PublishStatus == false);
+            }
 
             var totalCount = fixtures.Count();
 

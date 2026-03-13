@@ -49,9 +49,9 @@ namespace Leaguelane.ApiService.Endpoints
         /// <param name="pageSize"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static async Task<IResult> GetFixtures([FromServices] IFixtureFeatureService fixtureFeatureService, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default)
+        public static async Task<IResult> GetFixtures([FromServices] IFixtureFeatureService fixtureFeatureService, int page = 1, int pageSize = 10, string publishStatus = "None", CancellationToken cancellationToken = default)
         {
-            var result = await fixtureFeatureService.GetFixtures(page, pageSize, cancellationToken);
+            var result = await fixtureFeatureService.GetFixtures(page, pageSize, publishStatus, cancellationToken);
             return TypedResults.Ok(result);
         }
 

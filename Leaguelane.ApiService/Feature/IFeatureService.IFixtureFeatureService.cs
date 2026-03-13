@@ -4,7 +4,7 @@ namespace Leaguelane.ApiService.Feature
 {
     public interface IFixtureFeatureService
     {
-        Task<PaginationBaseResponse> GetFixtures(int page, int pageSize, CancellationToken cancellationToken);
+        Task<PaginationBaseResponse> GetFixtures(int page, int pageSize, string publishStatus, CancellationToken cancellationToken);
         Task<BaseResponse> PublishFixture(int fixtureId, CancellationToken cancellationToken);
         Task<BaseResponse> UnPublishFixture(int fixtureId, CancellationToken cancellationToken);
         Task<BaseResponse> CreateTips(TipRequestDto tipRequestDto, CancellationToken cancellationToken);

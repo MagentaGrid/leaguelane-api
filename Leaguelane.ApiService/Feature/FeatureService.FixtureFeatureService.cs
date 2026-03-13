@@ -158,10 +158,10 @@ namespace Leaguelane.ApiService.Feature
             return new BaseResponse(true, "Predictions fetched successfully", data);
         }
 
-        public async Task<PaginationBaseResponse> GetFixtures(int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<PaginationBaseResponse> GetFixtures(int page, int pageSize, string publishStatus, CancellationToken cancellationToken)
         {
             // 1. Fetch Fixtures (Ensure your FindAllAsync handles Skip/Take at the DB level!)
-            var (fixtures, totalCount) = await _fixtureService.GetAllFixturesAsync(page, pageSize, false, cancellationToken);
+            var (fixtures, totalCount) = await _fixtureService.GetAllFixturesAsync(page, pageSize, false, cancellationToken, publishStatus);
 
             if (!fixtures.Any()) return new PaginationBaseResponse(true, "No fixtures found", null, page, pageSize, 0, 0); ;
 

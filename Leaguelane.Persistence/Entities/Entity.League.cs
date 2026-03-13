@@ -23,6 +23,7 @@ namespace Leaguelane.Persistence.Entities
         public int? SportId { get; set; }
         public int CurrentSeason { get; set; }
         public int? Rank { get; set; }
+        public string? DisplayName { get; set; }
 
         [ForeignKey("CountryId")]
         public Country? Country { get; set; }
