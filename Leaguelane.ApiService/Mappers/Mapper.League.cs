@@ -14,7 +14,8 @@
                 CurrentSeason = league.CurrentSeason,
                 LogoUrl = league.LogoUrl,
                 Type = league.Type,
-                Active = league.Active
+                Active = league.Active,
+                DisplayName = league.DisplayName,
             };
         }
     }

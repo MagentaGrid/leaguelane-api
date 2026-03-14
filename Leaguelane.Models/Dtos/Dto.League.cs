@@ -11,6 +11,7 @@
         public int CurrentSeason { get; set; }
         public int? Rank { get; set; }
         public bool? Active { get; set; }
+        public string? DisplayName { get; set; }
     }
 
     public class UpdateLeagueRequestDto: LeaguesDto

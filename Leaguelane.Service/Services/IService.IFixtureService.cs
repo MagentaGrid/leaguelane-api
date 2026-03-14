@@ -10,7 +10,7 @@ namespace Leaguelane.Service.Services
     {
         Task GetAllFixtures(CancellationToken cancellationToken);
         Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, int? leagueRank, CancellationToken cancellationToken);
-        Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pageSize, bool publishStatus, CancellationToken cancellationToken);
+        Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pageSize, bool publishStatus, CancellationToken cancellationToken, string status = "Active");
         Task<Fixture> GetFixtureByIdAsync(int id, CancellationToken cancellationToken);
         Task UpdateFixtureAsync(Fixture fixture, CancellationToken cancellationToken);
         Task SoftDeleteFixtureAsync(int id, CancellationToken cancellationToken);

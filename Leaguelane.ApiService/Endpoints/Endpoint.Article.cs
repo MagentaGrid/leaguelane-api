@@ -32,9 +32,9 @@ namespace Leaguelane.ApiService.Endpoints
             return group;
         }
 
-        public static async Task<IResult> GetArticles([FromServices]IArticleFeatureService articleFeatureService, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, CancellationToken cancellationToken = default)
+        public static async Task<IResult> GetArticles([FromServices]IArticleFeatureService articleFeatureService, [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string publishStatus = "All", CancellationToken cancellationToken = default)
         {
-            var result = await articleFeatureService.GetAllArticles(page, pageSize, cancellationToken);
+            var result = await articleFeatureService.GetAllArticles(page, pageSize, publishStatus, cancellationToken);
             return TypedResults.Ok(result);
         }
 

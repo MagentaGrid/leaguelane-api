@@ -4,7 +4,7 @@ namespace Leaguelane.ApiService.Feature
 {
     public interface IArticleFeatureService
     {
-        Task<BaseResponse> GetAllArticles(int page, int pageSize, CancellationToken cancellationToken);
+        Task<BaseResponse> GetAllArticles(int page, int pageSize, string publishStatus, CancellationToken cancellationToken);
         Task<BaseResponse> GetArticleById(int articleId, CancellationToken cancellationToken);
         Task<BaseResponse> CreateArticle(ArticleRequestDto articleRequestDto, CancellationToken cancellationToken);
         Task<BaseResponse> UpdateArticle(ArticleUpdateRequestDto articleRequestDto, CancellationToken cancellationToken);

@@ -13,9 +13,18 @@ namespace Leaguelane.Service.Services
             _repository = repository;
         }
 
-        public async Task<List<Article>> GetArticlesAsync(int page, int pageSize, CancellationToken cancellationToken)
+        public async Task<List<Article>> GetArticlesAsync(int page, int pageSize, string status, CancellationToken cancellationToken)
         {
             var data = await _repository.FindAllAsync<Article>(x => (bool)x.Active, cancellationToken);
+
+            if (status.ToLower() == "published")
+            {
+                data = data.Where(x => x.IsPublished == true);
+            }
+            else if (status.ToLower() == "unpublished")
+            {
+                data = data.Where(x => x.IsPublished == false);
+            }
 
             return data.OrderByDescending(x => x.Created).Skip((page - 1) * pageSize).Take(pageSize).ToList();
         }
