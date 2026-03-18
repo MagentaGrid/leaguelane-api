@@ -177,4 +177,52 @@ namespace Leaguelane.Models.Dtos
         public List<int>? LeagueFilter { get; set; } = new List<int>();
         public List<LeaguePrediction>? Leagues { get; set; }
     }
+
+    public class PredictionMatchDetail
+    {
+        public string FixtureId { get; set; } = string.Empty;
+        public string Time { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
+        public string Venue { get; set; } = string.Empty;
+        public string Broadcaster { get; set; } = string.Empty;
+        public string LeagueName { get; set; } = string.Empty;
+        public string? LeagueLogoUrl { get; set; }
+        public string MatchdayLabel { get; set; } = string.Empty;
+        public PredictionTeamDetail? HomeTeam { get; set; }
+        public PredictionTeamDetail? AwayTeam { get; set; }
+        public List<TopMarket> TopMarkets { get; set; } = new List<TopMarket>();
+        public MatchInsight? Insight { get; set; }
+    }
+
+    public class PredictionTeamDetail
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? LogoUrl { get; set; }
+        public List<FormItem> Form { get; set; } = new List<FormItem>();
+    }
+
+    public class TopMarket
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public double Odds { get; set; }
+        public string? RecommendedStake { get; set; }
+        public string? Trend { get; set; }
+        public string? TrendLabel { get; set; }
+        public string? HistoricalRate { get; set; }
+    }
+
+    public class MatchInsight
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Body { get; set; } = string.Empty;
+        public string? KeyObservation { get; set; }
+        public string? AnalyticalEdge { get; set; }
+        public string AuthorName { get; set; } = string.Empty;
+        public string AuthorDate { get; set; } = string.Empty;
+        public string ReadTime { get; set; } = string.Empty;
+        public List<string> HomeFormSummary { get; set; } = new List<string>();
+        public List<string> AwayFormSummary { get; set; } = new List<string>();
+    }
 }

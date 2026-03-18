@@ -14,5 +14,6 @@ namespace Leaguelane.ApiService.Feature
         Task<BaseResponse> DeleleteTip(int tipId, CancellationToken cancellationToken);
         Task<BaseResponse> GetFeaturedPredictions(int count, CancellationToken cancellationToken);
         Task<BaseResponse> GetPredictions(string league, int page, int pageSize, CancellationToken cancellationToken);
+        Task<BaseResponse> GetPredictionDetail(int fixtureId, CancellationToken cancellationToken);
     }
 }

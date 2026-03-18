@@ -276,5 +276,120 @@ namespace Leaguelane.ApiService.Feature
 
             return new BaseResponse(true, "Tip updated successfully", true);
         }
+
+        public async Task<BaseResponse> GetPredictionDetail(int fixtureId, CancellationToken cancellationToken)
+        {
+            var fixture = await _fixtureService.GetFixtureByApiIdAsync(fixtureId, cancellationToken);
+
+            if (fixture == null)
+                return new BaseResponse(false, "Match detail not found", null);
+
+            if (!await _oddsService.IsOddExistsAsync(fixture.FixtureId, cancellationToken))
+            {
+                _ = Task.Run(async () =>
+                {
+                    using var scope = _serviceScopeFactory.CreateScope();
+                    var oddsService = scope.ServiceProvider.GetRequiredService<IOddsService>();
+                    await oddsService.FetchAndStoreOddsAsync(fixture, CancellationToken.None);
+                });
+            }
+
+            var teams = await _teamService.GetAllTeamsByIds(
+                new List<int> { fixture.HomeTeamId ?? 0, fixture.AwayTeamId ?? 0 }.Where(id => id != 0).ToList(),
+                cancellationToken);
+
+            var league = await _leagueService.GetLeagueByApiIdAsync(fixture.LeagueId, cancellationToken);
+            var venue = await _venueService.GetVenueByApiId(fixture.VenueId ?? 0, cancellationToken);
+
+            var homeTeam = teams.FirstOrDefault(t => t.ApiTeamId == fixture.HomeTeamId);
+            var awayTeam = teams.FirstOrDefault(t => t.ApiTeamId == fixture.AwayTeamId);
+
+            var homeForm = BuildForm(fixture.GoalsHome, fixture.GoalsAway, isHome: true);
+            var awayForm = BuildForm(fixture.GoalsHome, fixture.GoalsAway, isHome: false);
+
+            var topMarkets = fixture.FixtureTips?
+                .Where(t => t.Active == true && t.IsVisible)
+                .Take(5)
+                .Select(t => new TopMarket
+                {
+                    Id = t.FixtureTipId.ToString(),
+                    Name = t.Title,
+                    Odds = double.TryParse(t.OddsValue?.Odd, System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out var odds) ? odds : 0,
+                    TrendLabel = t.Reasoning
+                }).ToList() ?? new List<TopMarket>();
+
+            var preview = fixture.FixturePreviews?.FirstOrDefault(p => p.Active == true);
+            MatchInsight? insight = null;
+            if (preview != null)
+            {
+                insight = new MatchInsight
+                {
+                    Title = preview.Headline,
+                    Body = preview.ShortIntro,
+                    KeyObservation = null,
+                    AnalyticalEdge = null,
+                    AuthorName = "LeagueLane",
+                    AuthorDate = fixture.Date?.ToString("MMM dd, yyyy") ?? string.Empty,
+                    ReadTime = "5 min read",
+                    HomeFormSummary = homeForm.Select(f => f.Code).ToList(),
+                    AwayFormSummary = awayForm.Select(f => f.Code).ToList()
+                };
+            }
+
+            var data = new PredictionMatchDetail
+            {
+                FixtureId = fixture.ApiFixtureId.ToString(),
+                Time = fixture.Date?.ToString("HH:mm") ?? string.Empty,
+                Date = fixture.Date?.ToString("ddd, MMM dd") ?? string.Empty,
+                Venue = venue?.Name ?? string.Empty,
+                Broadcaster = string.Empty,
+                LeagueName = league?.Name ?? string.Empty,
+                LeagueLogoUrl = league?.LogoUrl,
+                MatchdayLabel = "Matchday 9 of 34",
+                HomeTeam = new PredictionTeamDetail
+                {
+                    Id = homeTeam?.ApiTeamId.ToString() ?? (fixture.HomeTeamId?.ToString() ?? string.Empty),
+                    Name = homeTeam?.Name ?? string.Empty,
+                    LogoUrl = homeTeam?.LogoUrl,
+                    Form = homeForm
+                },
+                AwayTeam = new PredictionTeamDetail
+                {
+                    Id = awayTeam?.ApiTeamId.ToString() ?? (fixture.AwayTeamId?.ToString() ?? string.Empty),
+                    Name = awayTeam?.Name ?? string.Empty,
+                    LogoUrl = awayTeam?.LogoUrl,
+                    Form = awayForm
+                },
+                TopMarkets = topMarkets,
+                Insight = insight
+            };
+
+            return new BaseResponse(true, "Match detail fetched successfully", data);
+        }
+
+        private static List<FormItem> BuildForm(int? goalsHome, int? goalsAway, bool isHome)
+        {
+            string code;
+            if (goalsHome.HasValue && goalsAway.HasValue)
+            {
+                if (goalsHome > goalsAway) code = isHome ? "W" : "L";
+                else if (goalsHome < goalsAway) code = isHome ? "L" : "W";
+                else code = "D";
+            }
+            else
+            {
+                code = "D";
+            }
+
+            string colorHex = code switch
+            {
+                "W" => "#16a34a",
+                "L" => "#dc2626",
+                _ => "#ca8a04"
+            };
+
+            return Enumerable.Repeat(new FormItem { Code = code, ColorHex = colorHex }, 5).ToList();
+        }
     }
 }

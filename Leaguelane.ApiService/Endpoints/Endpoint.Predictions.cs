@@ -10,6 +10,7 @@ namespace Leaguelane.ApiService.Endpoints
         {
             group.MapGet("/featured", GetFeaturedPredictions).WithName("predictions-featured").Produces<object>(200);
             group.MapGet("", GetPredictions).WithName("predictions-list").Produces<object>(200);
+            group.MapGet("/{fixtureId:int}", GetPredictionDetail).WithName("predictions-detail").Produces<object>(200);
 
             return group;
         }
@@ -46,6 +47,14 @@ namespace Leaguelane.ApiService.Endpoints
             return TypedResults.Ok(result);
         }
 
-        
+        /// <summary>
+        /// Get prediction detail for a specific fixture.
+        /// Returns full match detail including teams, form, top markets, and insight.
+        /// </summary>
+        public static async Task<IResult> GetPredictionDetail([FromServices] IFixtureFeatureService fixtureFeatureService, int fixtureId, CancellationToken cancellationToken = default)
+        {
+            var result = await fixtureFeatureService.GetPredictionDetail(fixtureId, cancellationToken);
+            return TypedResults.Ok(result);
+        }
     }
 }

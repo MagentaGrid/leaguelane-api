@@ -214,6 +214,19 @@ namespace Leaguelane.Service.Services
             return true;
         }
 
+        public async Task<Fixture?> GetFixtureByApiIdAsync(int apiFixtureId, CancellationToken cancellationToken)
+        {
+            return await _context.Fixtures
+                .Include(x => x.FixturePreviews)
+                .Include(x => x.FixtureTips)
+                    .ThenInclude(t => t.OddsValue)
+                .Include(x => x.FixtureTips)
+                    .ThenInclude(t => t.Bookmaker)
+                .Include(x => x.FixtureTips)
+                    .ThenInclude(t => t.Bet)
+                .FirstOrDefaultAsync(x => x.ApiFixtureId == apiFixtureId, cancellationToken);
+        }
+
         public async Task<bool> UnPublishFixture(int fixtureId, CancellationToken cancellationToken)
         {
             var fixture = await _repository.GetByIdAsync<Fixture>(fixtureId, cancellationToken);
