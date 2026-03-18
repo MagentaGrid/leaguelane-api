@@ -4,13 +4,7 @@ using Leaguelane.Persistence.Entities;
 using Leaguelane.Repository.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Leaguelane.Service.Services
 {
@@ -25,6 +19,7 @@ namespace Leaguelane.Service.Services
         private readonly ILeagueRepository _leagueRepository;
         private readonly IRepository _repository;
         private readonly LeaguelaneDbContext _context;
+        private readonly IExternalApiErrorService _externalApiErrorService;
 
         public FixtureService(IConfiguration configuration
             , ILeagueRepository leagueRepository
@@ -46,11 +41,11 @@ namespace Leaguelane.Service.Services
 
             foreach (var item in leagues)
             {
-                await GetAllFixturesByLeagueAndSeason(item.LeagueId, item.CurrentSeason, cancellationToken);
+                await GetAllFixturesByLeagueAndSeason(item.LeagueId, item.CurrentSeason, item.Rank, cancellationToken);
                 await Task.Delay(500, cancellationToken); // Rate limiting
             }
         }
-        public async Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, CancellationToken cancellationToken)
+        public async Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, int? leagueRank, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage
             {
@@ -64,39 +59,55 @@ namespace Leaguelane.Service.Services
             try
             {
                 using var response = await _httpClient.SendAsync(request, cancellationToken);
-                response.EnsureSuccessStatusCode();
-
-                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-                var fixtures = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<FixtureResponseDto?>>>(
-                    responseBody,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (fixtures != null && fixtures.Response != null && fixtures.Response.Count > 0)
+                try
                 {
-                    var fixtureList = fixtures.Response.Select(f => new Fixture
+                    response.EnsureSuccessStatusCode();
+
+                    var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                    var fixtures = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<FixtureResponseDto?>>>(
+                        responseBody,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (fixtures != null && fixtures.Response != null && fixtures.Response.Count > 0)
                     {
-                        //FixtureId = f.Fixture.Id,
-                        Timezone = f.Fixture.Timezone,
-                        Date = f.Fixture.Date,
-                        Time = f.Fixture.Timestamp,
+                        var fixtureList = fixtures.Response.Select(f => new Fixture
+                        {
+                            //FixtureId = f.Fixture.Id,
+                            Timezone = f.Fixture.Timezone,
+                            Date = f.Fixture.Date,
+                            Time = f.Fixture.Timestamp,
 
-                        VenueId = f.Fixture.Venue.Id,
-                        LeagueId = f.League.Id,
-                        SeasonId = f.League.Season,
-                        RoundId = 7,
+                            VenueId = f.Fixture.Venue.Id,
+                            LeagueId = f.League.Id,
+                            SeasonId = f.League.Season,
+                            RoundId = 7,
 
-                        HomeTeamId = f.Teams.Home.Id,
-                        AwayTeamId = f.Teams.Away.Id,
-                        GoalsHome = f.Goals.Home,
-                        GoalsAway = f.Goals.Away,
+                            HomeTeamId = f.Teams.Home.Id,
+                            AwayTeamId = f.Teams.Away.Id,
+                            GoalsHome = f.Goals.Home,
+                            GoalsAway = f.Goals.Away,
+                            Rank = leagueRank,
 
-                        Created = DateTime.UtcNow,
-                        Active = true,
-                        ApiFixtureId = (int)f.Fixture.Id
-                    }).ToList();
+                            Created = DateTime.UtcNow,
+                            Active = true,
+                            ApiFixtureId = (int)f.Fixture.Id
+                        }).ToList();
 
-                    await _fixtureRepository.AddFixturesBatchAsync(fixtureList, cancellationToken);
+                        await _fixtureRepository.AddFixturesBatchAsync(fixtureList, cancellationToken);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                        , request.ToString()
+                        , response.ToString()
+                        , DateTime.UtcNow
+                        , request.Method.Method
+                        , request.RequestUri.AbsoluteUri
+                        , cancellationToken);
+
+                    throw;
                 }
 
             }
@@ -106,16 +117,26 @@ namespace Leaguelane.Service.Services
             }
         }
 
-        public async Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pagesize, bool publishStatus, CancellationToken cancellationToken)
+        public async Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pagesize, bool publishStatus, CancellationToken cancellationToken, string status = "Active")
         {
             var fixtures = await _repository.FindAllAsync<Fixture>(x => x.Date >= DateTime.UtcNow && (!publishStatus || x.PublishStatus), cancellationToken);
+
+            if (status.ToLower() == "published")
+            {
+                fixtures = fixtures.Where(x => x.PublishStatus == true);
+            }
+            else if (status.ToLower() == "unpublished")
+            {
+                fixtures = fixtures.Where(x => x.PublishStatus == false);
+            }
 
             var totalCount = fixtures.Count();
 
             var data = fixtures
                 .Include(x => x.FixturePreviews)
                 .Include(x => x.FixtureTips)
-                .OrderBy(x => x.Date)
+                .OrderBy( x => x.Rank)
+                .ThenBy(x => x.Date)
                 .Skip((page - 1) * pagesize)
                 .Take(pagesize).ToList();
 
@@ -242,6 +263,23 @@ namespace Leaguelane.Service.Services
             await _repository.SaveChangesAsync<Fixture>(cancellationToken);
 
             return true;
+        }
+
+        public async Task<(List<Fixture>, int)> GetAllFixturesByLeagueAsync(int page, int pagesize, bool publishStatus, int leagueId, CancellationToken cancellationToken)
+        {
+            var fixtures = await _repository.FindAllAsync<Fixture>(x => x.Date >= DateTime.UtcNow && (!publishStatus || x.PublishStatus) && x.LeagueId == leagueId, cancellationToken);
+
+            var totalCount = fixtures.Count();
+
+            var data = fixtures
+                .Include(x => x.FixturePreviews)
+                .Include(x => x.FixtureTips)
+                .OrderBy(x => x.Rank)
+                .ThenBy(x => x.Date)
+                .Skip((page - 1) * pagesize)
+                .Take(pagesize).ToList();
+
+            return (data, totalCount);
         }
     }
 }

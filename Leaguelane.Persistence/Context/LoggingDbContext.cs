@@ -11,4 +11,5 @@ public class LoggingDbContext : DbContext
 
     public DbSet<LogEntry> LogEntries => Set<LogEntry>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<ExternalApiError> ExternalApiErrors => Set<ExternalApiError>();
 }

@@ -16,12 +16,13 @@ namespace Leaguelane.Service.Services
         private readonly HttpClient _httpClient = new HttpClient();
         private readonly ILeagueRepository _leagueRepository;
         private readonly IRepository _repository;
+        private readonly IExternalApiErrorService _externalApiErrorService;
 
         private readonly string _baseUrl;
         private readonly string _apiHost;
         private readonly string _apiKey;
 
-        public LeagueService(IConfiguration configuration, ILeagueRepository leagueRepository, IRepository repository)
+        public LeagueService(IConfiguration configuration, ILeagueRepository leagueRepository, IRepository repository, IExternalApiErrorService externalApiErrorService)
         {
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? throw new ArgumentNullException("BaseUrl");
             _apiHost = configuration["FootballApi:ApiHost"] ?? throw new ArgumentNullException("ApiHost");
@@ -29,6 +30,7 @@ namespace Leaguelane.Service.Services
 
             _leagueRepository = leagueRepository;
             _repository = repository;
+            _externalApiErrorService = externalApiErrorService;
         }
 
         public async Task<bool> GetAllLeaguesAsync(CancellationToken cancellationToken)
@@ -45,29 +47,43 @@ namespace Leaguelane.Service.Services
             try
             {
                 using var response = await _httpClient.SendAsync(request, cancellationToken);
-                response.EnsureSuccessStatusCode();
-
-                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-                var data = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<LeagueResponseDto>>>(
-                    responseBody,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (data != null && data.Response != null && data.Response.Count > 0)
+                try
                 {
-                    var leagues = data.Response.Select(l => new League
-                    {
-                        Name = l.League.Name,
-                        Active = true,
-                        Created = DateTime.UtcNow,
-                        LogoUrl = l.League.Logo,
-                        ApiLeagueId = l.League.Id,
-                        Type = l.League.Type,
-                        CurrentSeason = l.Seasons.Where(s => s.Current == true).Select(s => s.Year).FirstOrDefault(),
-                        CountryCode = l.Country.Code,
-                    }).ToList();
+                    response.EnsureSuccessStatusCode();
 
-                    await _leagueRepository.AddLeagues(leagues, cancellationToken);
+                    var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                    var data = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<LeagueResponseDto>>>(
+                        responseBody,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (data != null && data.Response != null && data.Response.Count > 0)
+                    {
+                        var leagues = data.Response.Select(l => new League
+                        {
+                            Name = l.League.Name,
+                            Active = true,
+                            Created = DateTime.UtcNow,
+                            LogoUrl = l.League.Logo,
+                            ApiLeagueId = l.League.Id,
+                            Type = l.League.Type,
+                            CurrentSeason = l.Seasons.Where(s => s.Current == true).Select(s => s.Year).FirstOrDefault(),
+                            CountryCode = l.Country.Code,
+                        }).ToList();
+
+                        await _leagueRepository.AddLeagues(leagues, cancellationToken);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                        , request.ToString()
+                        , response.ToString()
+                        , DateTime.UtcNow
+                        , request.Method.Method
+                        , request.RequestUri.AbsoluteUri
+                        , cancellationToken);
+                    return false;
                 }
 
                 return true;
@@ -90,6 +106,62 @@ namespace Leaguelane.Service.Services
         public async Task<League> GetLeagueByApiIdAsync(int id, CancellationToken cancellationToken)
         {
             return await _repository.FirstOrDefaultAsync<League>(x => x.ApiLeagueId == id, cancellationToken);
+        }
+
+        public async Task<bool> UpdateLeagueAsync(UpdateLeagueRequestDto leagueDto, CancellationToken cancellationToken)
+        {
+            var league = await _repository.FirstOrDefaultAsync<League>(x => x.LeagueId == leagueDto.LeagueId, cancellationToken);
+
+            if (league == null)
+                throw new Exception("League not found");
+
+            league.DisplayName = leagueDto.DisplayName;
+            //league.CurrentSeason = leagueDto.CurrentSeason;
+
+            await _repository.UpdateAsync(league);
+            await _repository.SaveChangesAsync<League>(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> DisableLeagueAsync(int id, CancellationToken cancellationToken)
+        {
+            var league = await _repository.FirstOrDefaultAsync<League>(x => x.LeagueId == id, cancellationToken);
+            if (league == null) throw new Exception("League not found");
+            league.Active = false;
+            await _repository.UpdateAsync(league);
+            await _repository.SaveChangesAsync<League>(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> EnableLeagueAsync(int id, CancellationToken cancellationToken)
+        {
+            var league = await _repository.FirstOrDefaultAsync<League>(x => x.LeagueId == id, cancellationToken);
+            if (league == null) throw new Exception("League not found");
+            league.Active = true;
+            await _repository.UpdateAsync(league);
+            await _repository.SaveChangesAsync<League>(cancellationToken);
+            return true;
+        }
+
+        public async Task<(int totalCount, List<League>)> GetAllLeagues(int page, int pageSize, string? search, string status, CancellationToken cancellationToken)
+        {
+            var data = await _repository.GetAllAsync<League>();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                data = data.Where(x => x.Name.ToLower().Contains(search.ToLower()));
+            }
+
+            if (status.ToLower() == "active")
+            {
+                data = data.Where(x => x.Active == true);
+            }
+            else if (status.ToLower() == "inactive")
+            {
+                data = data.Where(x => x.Active == false);
+            }
+
+            return (data.Count(), data.OrderBy(x => x.Rank).Skip((page - 1) * pageSize).Take(pageSize).ToList());
         }
     }
 }

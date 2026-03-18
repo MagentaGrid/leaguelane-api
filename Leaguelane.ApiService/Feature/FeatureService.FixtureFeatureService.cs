@@ -16,6 +16,8 @@ namespace Leaguelane.ApiService.Feature
         private readonly IPreviewService _previewService;
         private readonly IOddsService _oddsService;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IH2HService _h2hService;
+        private readonly ITeamStatService _teamStatService;
         public FixtureFeatureService(IFixtureService fixtureService
             , IVenueService venueService
             , ITeamService teamService
@@ -23,7 +25,9 @@ namespace Leaguelane.ApiService.Feature
             , ITipService tipService
             , IPreviewService previewService
             , IOddsService oddsService
-            , IServiceScopeFactory serviceScopeFactory)
+            , IServiceScopeFactory serviceScopeFactory
+            , IH2HService h2hService
+            , ITeamStatService teamStatService)
         {
             _fixtureService = fixtureService;
             _venueService = venueService;
@@ -33,6 +37,8 @@ namespace Leaguelane.ApiService.Feature
             _previewService = previewService;
             _oddsService = oddsService;
             _serviceScopeFactory = serviceScopeFactory;
+            _h2hService = h2hService;
+            _teamStatService = teamStatService;
         }
 
         public async Task<BaseResponse> GetPredictions(string league, int page, int pageSize, CancellationToken cancellationToken)
@@ -152,32 +158,28 @@ namespace Leaguelane.ApiService.Feature
             return new BaseResponse(true, "Predictions fetched successfully", data);
         }
 
-        public async Task<PaginationBaseResponse> GetFixtures(int page, int pageSize,CancellationToken cancellationToken)
+        public async Task<PaginationBaseResponse> GetFixtures(int page, int pageSize, string publishStatus, CancellationToken cancellationToken)
         {
-            var (fixtures, totalCount) = await _fixtureService.GetAllFixturesAsync(page, pageSize,false, cancellationToken);
+            // 1. Fetch Fixtures (Ensure your FindAllAsync handles Skip/Take at the DB level!)
+            var (fixtures, totalCount) = await _fixtureService.GetAllFixturesAsync(page, pageSize, false, cancellationToken, publishStatus);
 
-            var leagues = await _leagueService.GetAllActiveLeaguesByIds(fixtures.Select(x => (int)x.LeagueId).Distinct().ToList(), cancellationToken);
+            if (!fixtures.Any()) return new PaginationBaseResponse(true, "No fixtures found", null, page, pageSize, 0, 0); ;
 
-            var homeTeamIds = fixtures.Where(x => x.HomeTeamId != null).Select(x => (int)x.HomeTeamId).Distinct().ToList();
+            // 2. Collect unique IDs to avoid fetching duplicates
+            var leagueIds = fixtures.Select(x => (int)x.LeagueId).Distinct().ToList();
+            var teamIds = fixtures.SelectMany(x => new[] { x.HomeTeamId, x.AwayTeamId })
+                                  .Where(id => id.HasValue).Select(id => id.Value).Distinct().ToList();
+            var venueIds = fixtures.Where(x => x.VenueId != null).Select(x => (int)x.VenueId).Distinct().ToList();
 
-            var awayTeamIds = fixtures.Where(x => x.AwayTeamId != null).Select(x => (int)x.AwayTeamId).Distinct().ToList();
+            // 3. Fire off DB calls in PARALLEL to save time (Wait for all to finish)
+            var leaguesTask = _leagueService.GetAllActiveLeaguesByIds(leagueIds, cancellationToken);
+            var teamsTask = _teamService.GetAllTeamsByIds(teamIds, cancellationToken);
+            var venuesTask = _venueService.GetAllVenues(venueIds, cancellationToken);
 
-            var teams = await _teamService.GetAllTeamsByIds(homeTeamIds.Concat(awayTeamIds).Distinct().ToList(), cancellationToken);
-
-            var venues = await _venueService.GetAllVenues(fixtures.Where(x => x.VenueId != null).Select(x => (int) x.VenueId).Distinct().ToList(), cancellationToken);
+            await Task.WhenAll(leaguesTask, teamsTask, venuesTask);
 
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
-
-            return new PaginationBaseResponse
-            (
-                true, 
-                "Fixtures fetched successfully", 
-                FixtureMapper.MapToApiResponseDto(fixtures, venues, teams, leagues),
-                page, 
-                pageSize, 
-                totalCount, 
-                totalPages
-            );
+            return new PaginationBaseResponse(true, "Success", FixtureMapper.MapToApiResponseDto(fixtures, await venuesTask, await teamsTask, await leaguesTask), page, pageSize, totalCount, totalPages);
         }
 
         public async Task<BaseResponse> PublishFixture(int fixtureId, CancellationToken cancellationToken)
@@ -231,7 +233,15 @@ namespace Leaguelane.ApiService.Feature
             var league = await _leagueService.GetLeagueByApiIdAsync(fixture.LeagueId, cancellationToken);
             var venue = await _venueService.GetVenueByApiId(fixture.VenueId ?? 0, cancellationToken);
 
-            return new BaseResponse(true, "Fixture fetched successfully", FixtureMapper.FixtureDetailsApiResponseDto(fixture, teams, league, venue));
+            var data = FixtureMapper.FixtureDetailsApiResponseDto(fixture, teams, league, venue);
+
+            data.H2H = await _h2hService.GetH2H(fixture.HomeTeamId ?? 0, fixture.AwayTeamId ?? 0, cancellationToken);
+
+            data.AwayTeamStats = await _teamStatService.FetchAndStoreTeamStatsAsync(fixture.LeagueId, fixture.AwayTeamId ?? 0, fixture.SeasonId, 1, cancellationToken);
+
+            data.HomeTeamStats = await _teamStatService.FetchAndStoreTeamStatsAsync(fixture.LeagueId, fixture.HomeTeamId ?? 0, fixture.SeasonId, 1, cancellationToken);
+
+            return new BaseResponse(true, "Fixture fetched successfully", data);
         }
 
         public async Task<BaseResponse> GetFeaturedPredictions(int count, CancellationToken cancellationToken)
@@ -275,6 +285,30 @@ namespace Leaguelane.ApiService.Feature
             await _tipService.UpdateTipAsync(tipRequestDto, cancellationToken);
 
             return new BaseResponse(true, "Tip updated successfully", true);
+        }
+
+        public async Task<PaginationBaseResponse> GetFixturesByLeague(int page, int pageSize, int leagueId, CancellationToken cancellationToken)
+        {
+            // 1. Fetch Fixtures (Ensure your FindAllAsync handles Skip/Take at the DB level!)
+            var (fixtures, totalCount) = await _fixtureService.GetAllFixturesByLeagueAsync(page, pageSize, false, leagueId, cancellationToken);
+
+            if (!fixtures.Any()) return new PaginationBaseResponse(true, "No fixtures found", null, page, pageSize, 0, 0); ;
+
+            // 2. Collect unique IDs to avoid fetching duplicates
+            var leagueIds = fixtures.Select(x => (int)x.LeagueId).Distinct().ToList();
+            var teamIds = fixtures.SelectMany(x => new[] { x.HomeTeamId, x.AwayTeamId })
+                                  .Where(id => id.HasValue).Select(id => id.Value).Distinct().ToList();
+            var venueIds = fixtures.Where(x => x.VenueId != null).Select(x => (int)x.VenueId).Distinct().ToList();
+
+            // 3. Fire off DB calls in PARALLEL to save time (Wait for all to finish)
+            var leaguesTask = _leagueService.GetAllActiveLeaguesByIds(leagueIds, cancellationToken);
+            var teamsTask = _teamService.GetAllTeamsByIds(teamIds, cancellationToken);
+            var venuesTask = _venueService.GetAllVenues(venueIds, cancellationToken);
+
+            await Task.WhenAll(leaguesTask, teamsTask, venuesTask);
+
+            var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            return new PaginationBaseResponse(true, "Success", FixtureMapper.MapToApiResponseDto(fixtures, await venuesTask, await teamsTask, await leaguesTask), page, pageSize, totalCount, totalPages);
         }
 
         public async Task<BaseResponse> GetPredictionDetail(int fixtureId, CancellationToken cancellationToken)

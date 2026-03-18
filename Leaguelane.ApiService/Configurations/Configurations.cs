@@ -95,6 +95,12 @@ namespace Leaguelane.Api.Configurations
             //Register article service
             services.AddScoped<IArticleService, ArticleService>();
 
+            //Register external api error service
+            services.AddScoped<IExternalApiErrorService, ExternalApiErrorService>();
+
+            //Register H2H service
+            services.AddScoped<IH2HService, H2HService>();
+
             return services;
         }
 
@@ -159,6 +165,9 @@ namespace Leaguelane.Api.Configurations
             //Register bet repositories
             services.AddScoped<IBetRepository, BetRepository>();
 
+            //Register logging repositories
+            services.AddScoped<ILoggingRepository, LoggingRepository>();
+
             return services;
         }
 
@@ -181,6 +190,12 @@ namespace Leaguelane.Api.Configurations
 
             //Register article feature services
             services.AddScoped<IArticleFeatureService, ArticleFeatureService>();
+
+            //Register league feature services
+            services.AddScoped<ILeagueFeatureService, LeagueFeatureService>();
+
+            //Register team feature services
+            services.AddScoped<ITeamFeatureService, TeamFeatureService>();
 
             return services;
         }

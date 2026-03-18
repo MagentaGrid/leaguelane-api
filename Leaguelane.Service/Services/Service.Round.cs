@@ -20,8 +20,9 @@ namespace Leaguelane.Service.Services
         private readonly string _baseUrl;
         private readonly string _apiHost;
         private readonly string _apiKey;
+        private readonly IExternalApiErrorService _externalApiErrorService;
 
-        public RoundService(IRoundRepository roundRepository, IConfiguration configuration, ISeasonRepository seasonRepository, ILeagueRepository leagueRepository)
+        public RoundService(IRoundRepository roundRepository, IConfiguration configuration, ISeasonRepository seasonRepository, ILeagueRepository leagueRepository, IExternalApiErrorService externalApiErrorService)
         {
             _roundRepository = roundRepository;
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? string.Empty;
@@ -29,6 +30,7 @@ namespace Leaguelane.Service.Services
             _apiKey = configuration["FootballApi:ApiKey"] ?? string.Empty;
             _seasonRepository = seasonRepository;
             _leagueRepository = leagueRepository;
+            _externalApiErrorService = externalApiErrorService;
         }
 
         public async Task FetchAndStoreRoundsAsync(int leagueId, int seasonId, int sportId, CancellationToken cancellationToken)
@@ -42,29 +44,44 @@ namespace Leaguelane.Service.Services
             request.Headers.Add("x-rapidapi-key", _apiKey);
 
             using var response = await _httpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            var apiResponse = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<string>>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            var rounds = new List<Round>();
-            if (apiResponse?.Response != null)
+            try
             {
-                foreach (var roundName in apiResponse.Response)
+                response.EnsureSuccessStatusCode();
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                var apiResponse = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<string>>>(responseBody, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                var rounds = new List<Round>();
+                if (apiResponse?.Response != null)
                 {
-                    if (!string.IsNullOrEmpty(roundName))
+                    foreach (var roundName in apiResponse.Response)
                     {
-                        rounds.Add(new Round
+                        if (!string.IsNullOrEmpty(roundName))
                         {
-                            Name = roundName,
-                            LeagueId = leagueId,
-                            SeasonId = seasonId,
-                            SportId = sportId,
-                            Created = DateTime.UtcNow,
-                            Active = true
-                        });
+                            rounds.Add(new Round
+                            {
+                                Name = roundName,
+                                LeagueId = leagueId,
+                                SeasonId = seasonId,
+                                SportId = sportId,
+                                Created = DateTime.UtcNow,
+                                Active = true
+                            });
+                        }
                     }
+                    await _roundRepository.AddOrUpdateRoundsAsync(rounds, cancellationToken);
                 }
-                await _roundRepository.AddOrUpdateRoundsAsync(rounds, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                    , request.ToString()
+                    , response.ToString()
+                    , DateTime.UtcNow
+                    , request.Method.Method
+                    , request.RequestUri.AbsoluteUri
+                    , cancellationToken);
+
+                throw;
             }
         }
 

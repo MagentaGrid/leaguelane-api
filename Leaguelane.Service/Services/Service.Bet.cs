@@ -19,8 +19,9 @@ namespace Leaguelane.Service.Services
         private readonly string _apiHost;
         private readonly string _apiKey;
         private readonly IRepository _repository;
+        private readonly IExternalApiErrorService _externalApiErrorService;
 
-        public BetService(IBetRepository betRepository, IConfiguration configuration, IRepository repository)
+        public BetService(IBetRepository betRepository, IConfiguration configuration, IRepository repository, IExternalApiErrorService externalApiErrorService)
         {
             _betRepository = betRepository;
             _baseUrl = configuration["FootballApi:BaseUrl"];
@@ -28,6 +29,7 @@ namespace Leaguelane.Service.Services
             _apiHost = configuration["FootballApi:ApiHost"];
             _apiKey = configuration["FootballApi:ApiKey"];
             _repository = repository;
+            _externalApiErrorService = externalApiErrorService;
         }
 
         public async Task<bool> GetAllBetsAsync(CancellationToken cancellationToken)
@@ -45,27 +47,40 @@ namespace Leaguelane.Service.Services
             {
                 using (var response = await _httpClient.SendAsync(request, cancellationToken))
                 {
-                    response.EnsureSuccessStatusCode();
-                    var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-                    var data = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<BetDto>>>(responseBody);
-
-                    if (data != null && data.Response != null && data.Response.Count > 0)
+                    try
                     {
-                        var bets = data.Response.Select(b => new Leaguelane.Persistence.Entities.Bet
+                        response.EnsureSuccessStatusCode();
+                        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+                        var data = JsonSerializer.Deserialize<FootballApiBaseResponseDto<List<BetDto>>>(responseBody);
+
+                        if (data != null && data.Response != null && data.Response.Count > 0)
                         {
-                            ApiBetId = b.Id,
-                            Name = b.Name,
-                            Active = true,
-                            Created = DateTime.UtcNow
-                        }).ToList();
-                        await _betRepository.AddBets(bets, cancellationToken);
+                            var bets = data.Response.Select(b => new Leaguelane.Persistence.Entities.Bet
+                            {
+                                ApiBetId = b.Id,
+                                Name = b.Name,
+                                Active = true,
+                                Created = DateTime.UtcNow
+                            }).ToList();
+                            await _betRepository.AddBets(bets, cancellationToken);
+                        }
+                        return true;
+                    }catch (Exception ex)
+                    {
+                        await _externalApiErrorService.AddExeternalApiErrorAsync(ex.Message
+                            , request.ToString()
+                            , response.ToString()
+                            , DateTime.UtcNow
+                            , request.Method.Method
+                            , request.RequestUri.AbsoluteUri
+                            , cancellationToken);
+                        throw;
                     }
-                    return true;
                 }
             }
             catch (HttpRequestException)
             {
-                return false;
+                throw;
             }
         }
 

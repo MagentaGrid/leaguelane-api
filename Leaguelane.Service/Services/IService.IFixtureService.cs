@@ -9,8 +9,8 @@ namespace Leaguelane.Service.Services
     public interface IFixtureService
     {
         Task GetAllFixtures(CancellationToken cancellationToken);
-        Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, CancellationToken cancellationToken);
-        Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pageSize, bool publishStatus, CancellationToken cancellationToken);
+        Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, int? leagueRank, CancellationToken cancellationToken);
+        Task<(List<Fixture>, int)> GetAllFixturesAsync(int page, int pageSize, bool publishStatus, CancellationToken cancellationToken, string status = "Active");
         Task<Fixture> GetFixtureByIdAsync(int id, CancellationToken cancellationToken);
         Task UpdateFixtureAsync(Fixture fixture, CancellationToken cancellationToken);
         Task SoftDeleteFixtureAsync(int id, CancellationToken cancellationToken);
@@ -22,6 +22,7 @@ namespace Leaguelane.Service.Services
         Task<int> GetMissingTipsCountAsync(CancellationToken cancellationToken);
         Task<bool> UnPublishFixture(int fixtureId, CancellationToken cancellationToken);
         Task<bool> PublishFixture(int fixtureId, CancellationToken cancellationToken);
+        Task<(List<Fixture>, int)> GetAllFixturesByLeagueAsync(int page, int pagesize, bool publishStatus, int leagueId, CancellationToken cancellationToken);
         Task<Fixture?> GetFixtureByApiIdAsync(int apiFixtureId, CancellationToken cancellationToken);
     }
 }

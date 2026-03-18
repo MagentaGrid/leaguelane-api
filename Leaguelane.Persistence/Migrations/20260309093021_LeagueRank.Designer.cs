@@ -3,6 +3,7 @@ using System;
 using Leaguelane.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Leaguelane.Persistence.Migrations
 {
     [DbContext(typeof(LeaguelaneDbContext))]
-    partial class LeaguelaneDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260309093021_LeagueRank")]
+    partial class LeagueRank
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -641,9 +644,6 @@ namespace Leaguelane.Persistence.Migrations
                     b.Property<int>("CurrentSeason")
                         .HasColumnType("integer");
 
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("text");
-
                     b.Property<string>("LogoUrl")
                         .HasColumnType("text");
 
@@ -1013,9 +1013,6 @@ namespace Leaguelane.Persistence.Migrations
 
                     b.Property<int?>("CreatedBy")
                         .HasColumnType("integer");
-
-                    b.Property<string>("DisplayName")
-                        .HasColumnType("text");
 
                     b.Property<int?>("Founded")
                         .HasColumnType("integer");
