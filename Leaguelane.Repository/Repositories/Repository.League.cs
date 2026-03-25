@@ -27,7 +27,7 @@ namespace Leaguelane.Repository.Repositories
 
         public async Task<bool> AddLeagues(List<League> leagues, CancellationToken cancellationToken)
         {
-            var existingLeagues = _context.Leagues.Where(x => x.Active == true).ToList();
+            var existingLeagues = _context.Leagues.ToList();
             var leaguesToBeAdded = leagues.Where(x => !existingLeagues.Any(y => y.ApiLeagueId == x.ApiLeagueId)).ToList();
             _context.Leagues.AddRange(leaguesToBeAdded);
             await _context.SaveChangesAsync(cancellationToken);

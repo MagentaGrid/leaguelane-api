@@ -17,7 +17,7 @@ namespace Leaguelane.Models.Dtos
         [JsonPropertyName("name")]
         public string Name { get; set; }
         [JsonPropertyName("code")]
-        public string Code { get; set; }
+        public string? Code { get; set; }
         [JsonPropertyName("country")]
         public string Country { get; set; }
         [JsonPropertyName("founded")]
