@@ -15,17 +15,17 @@ namespace Leaguelane.Models.Dtos
         [JsonPropertyName("id")]
         public int Id { get; set; }
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         [JsonPropertyName("code")]
         public string? Code { get; set; }
         [JsonPropertyName("country")]
-        public string Country { get; set; }
+        public string? Country { get; set; }
         [JsonPropertyName("founded")]
         public int? Founded { get; set; }
         [JsonPropertyName("national")]
         public bool? National { get; set; }
         [JsonPropertyName("logo")]
-        public string Logo { get; set; }
+        public string? Logo { get; set; }
     }
 
     public class VenueApiDto

@@ -67,7 +67,7 @@ namespace Leaguelane.Service.Services
                         var team = new PersistenceTeam
                         {
                             ApiTeamId = item.Team.Id,
-                            Name = item.Team.Name,
+                            Name = item.Team.Name ?? "",
                             Code = item.Team.Code,
                             Country = item.Team.Country,
                             Founded = item.Team.Founded,

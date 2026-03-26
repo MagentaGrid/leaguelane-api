@@ -25,7 +25,8 @@ namespace Leaguelane.Service.Services
             , ILeagueRepository leagueRepository
             , IFixtureRepository fixtureRepository
             , IRepository repository
-            , LeaguelaneDbContext context)
+            , LeaguelaneDbContext context
+            , IExternalApiErrorService externalApiErrorService)
         {
             _baseUrl = configuration["FootballApi:BaseUrl"] ?? throw new ArgumentNullException("BaseUrl");
             _apiHost = configuration["FootballApi:ApiHost"] ?? throw new ArgumentNullException("ApiHost");
@@ -34,6 +35,7 @@ namespace Leaguelane.Service.Services
             _leagueRepository = leagueRepository;
             _repository = repository;
             _context = context;
+            _externalApiErrorService = externalApiErrorService;
         }
         public async Task GetAllFixtures(CancellationToken cancellationToken)
         {
