@@ -36,7 +36,7 @@ namespace Leaguelane.Repository.Repositories
 
         public async Task<List<League>> GetAllActiveLeagues(CancellationToken cancellationToken)
         {
-            return await _context.Leagues.Where(x => x.Active == true && x.CurrentSeason >= DateTime.Now.Year).ToListAsync(cancellationToken);
+            return await _context.Leagues.Where(x => x.Active == true).ToListAsync(cancellationToken);
         }
     }
 }
