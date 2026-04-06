@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace Leaguelane.Models.Dtos
         public string Get { get; set; }
 
         [JsonPropertyName("errors")]
-        public List<string> Errors { get; set; }
+        public JsonElement Errors { get; set; }
 
         [JsonPropertyName("results")]
         public int Results { get; set; }
