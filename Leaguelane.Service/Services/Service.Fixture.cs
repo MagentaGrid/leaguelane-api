@@ -43,16 +43,16 @@ namespace Leaguelane.Service.Services
 
             foreach (var item in leagues)
             {
-                await GetAllFixturesByLeagueAndSeason(item.LeagueId, item.CurrentSeason, item.Rank, cancellationToken);
+                await GetAllFixturesByLeagueAndSeason(item.ApiLeagueId, item.CurrentSeason, item.Rank, cancellationToken);
                 await Task.Delay(500, cancellationToken); // Rate limiting
             }
         }
-        public async Task GetAllFixturesByLeagueAndSeason(int leagueId, int season, int? leagueRank, CancellationToken cancellationToken)
+        public async Task GetAllFixturesByLeagueAndSeason(int apiLeagueId, int season, int? leagueRank, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{_baseUrl}fixtures?league={leagueId}&season={season}&from={DateTime.UtcNow:yyyy-MM-dd}&to={DateTime.UtcNow.AddDays(3):yyyy-MM-dd}")
+                RequestUri = new Uri($"{_baseUrl}fixtures?league={apiLeagueId}&season={season}&from={DateTime.UtcNow:yyyy-MM-dd}&to={DateTime.UtcNow.AddDays(3):yyyy-MM-dd}")
             };
 
             request.Headers.Add("x-rapidapi-host", _apiHost);
