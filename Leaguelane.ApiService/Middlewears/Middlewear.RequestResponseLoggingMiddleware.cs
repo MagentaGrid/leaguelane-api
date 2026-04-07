@@ -42,11 +42,15 @@ public class RequestResponseLoggingMiddleware
         finally
         {
             stopwatch.Stop();
-            
+
             // Read Response
             responseBody.Seek(0, SeekOrigin.Begin);
             var responseBodyText = await new StreamReader(responseBody).ReadToEndAsync();
-            responseBody.Seek(0, SeekOrigin.Begin); // Reset for copying to original stream
+
+            // SANITIZATION: PostgreSQL cannot store the null character \0 (0x00) in text columns.
+            // We strip it from both the request and response strings.
+            var sanitizedRequest = requestBody?.Replace("\0", string.Empty);
+            var sanitizedResponse = responseBodyText?.Replace("\0", string.Empty);
 
             // Log to DB
             var auditLog = new AuditLog
@@ -55,20 +59,19 @@ public class RequestResponseLoggingMiddleware
                 Method = context.Request.Method,
                 Path = context.Request.Path,
                 QueryString = context.Request.QueryString.ToString(),
-                RequestBody = requestBody,
-                ResponseBody = responseBodyText,
+                RequestBody = sanitizedRequest, // Use sanitized version
+                ResponseBody = sanitizedResponse, // Use sanitized version
                 StatusCode = context.Response.StatusCode,
                 DurationMs = stopwatch.ElapsedMilliseconds,
-                User = context.User?.Identity?.Name, // Capture user if authenticated
+                User = context.User?.Identity?.Name,
                 IpAddress = context.Connection.RemoteIpAddress?.ToString()
             };
 
-            // Using a new scope or transient DbContext is handled by DI if middleware is transient or uses method injection
-            // InvokeAsync supports method injection for scoped services.
             dbContext.AuditLogs.Add(auditLog);
             await dbContext.SaveChangesAsync();
 
-            // Copy back to original stream
+            // Reset and Copy back to original stream
+            responseBody.Seek(0, SeekOrigin.Begin);
             await responseBody.CopyToAsync(originalBodyStream);
         }
     }

@@ -16,6 +16,9 @@ namespace Leaguelane.Api.Configurations
 
             //Register feature services
             builder.Services.RegisterFeatureServices();
+
+            //Register file storage
+            builder.Services.AddFileStorage(builder.Configuration);
         }
 
         private static IServiceCollection RegisterServices(this IServiceCollection services)
@@ -196,6 +199,33 @@ namespace Leaguelane.Api.Configurations
 
             //Register team feature services
             services.AddScoped<ITeamFeatureService, TeamFeatureService>();
+
+            //Register file feature services
+            services.AddScoped<IFileFeatureService, FileFeatureService>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddFileStorage(this IServiceCollection services, IConfiguration config)
+        {
+            var provider = config["Storage:Provider"]?.ToLower()
+                ?? throw new InvalidOperationException("Storage:Provider is not configured in environment variables.");
+
+            switch (provider)
+            {
+                case "s3":
+                case "minio":
+                case "r2":
+                    services.AddSingleton<IFileStorageService, S3FileStorageService>();
+                    break;
+
+                case "azure":
+                    services.AddSingleton<IFileStorageService, AzureFileStorageService>();
+                    break;
+
+                default:
+                    throw new NotSupportedException($"Storage provider '{provider}' is not supported.");
+            }
 
             return services;
         }

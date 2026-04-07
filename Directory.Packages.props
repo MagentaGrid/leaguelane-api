@@ -7,6 +7,7 @@
     <PackageVersion Include="Aspire.Hosting.NodeJs" Version="9.3.0" />
     <PackageVersion Include="Aspire.Hosting.SqlServer" Version="9.2.0" />
     <PackageVersion Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.2.0" />
+    <PackageVersion Include="AWSSDK.S3" Version="4.0.19.3" />
     <PackageVersion Include="Azure.Storage.Blobs" Version="12.24.0" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.5.0" />
     <PackageVersion Include="MediatR" Version="12.5.0" />
