@@ -28,6 +28,7 @@ namespace Leaguelane.ApiService.Middlewears
             {
                 _logger.LogError(ex, "An unhandled exception occurred");
 
+
                 // Log to DB
                 var logEntry = new LogEntry
                 {
