@@ -10,7 +10,8 @@ namespace Leaguelane.ApiService.Mappers
             {
                 BookmakerId = bookmaker.BookmakerId,
                 Name = bookmaker.Name,
-                ApiBookmakerId = bookmaker.ApiBookMakerId
+                ApiBookmakerId = bookmaker.ApiBookMakerId,
+                Active = bookmaker.Active ?? false
             };
         }
     }

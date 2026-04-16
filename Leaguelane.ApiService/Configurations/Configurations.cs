@@ -203,6 +203,9 @@ namespace Leaguelane.Api.Configurations
             //Register file feature services
             services.AddScoped<IFileFeatureService, FileFeatureService>();
 
+            //Register bookmaker feature service
+            services.AddScoped<IBookmakerFeatureService, BookmakerFeatureService>();
+
             return services;
         }
 

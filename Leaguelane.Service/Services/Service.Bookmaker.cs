@@ -1,12 +1,14 @@
+using Azure;
 using Leaguelane.Models.Dtos;
 using Leaguelane.Persistence.Entities;
 using Leaguelane.Repository.Repositories;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Leaguelane.Service.Services
 {
@@ -20,7 +22,12 @@ namespace Leaguelane.Service.Services
         private readonly string _apiKey;
         private readonly IExternalApiErrorService _externalApiErrorService;
 
-        public BookmakerService(IBookmakerRepository bookmakerRepository, IConfiguration configuration, IExternalApiErrorService externalApiErrorService)
+        private readonly IRepository _repository;
+
+        public BookmakerService(IBookmakerRepository bookmakerRepository
+            , IConfiguration configuration
+            , IExternalApiErrorService externalApiErrorService
+            , IRepository repository)
         {
             _bookmakerRepository = bookmakerRepository;
             _baseUrl = configuration["FootballApi:BaseUrl"];
@@ -28,6 +35,7 @@ namespace Leaguelane.Service.Services
             _apiHost = configuration["FootballApi:ApiHost"];
             _apiKey = configuration["FootballApi:ApiKey"];
             _externalApiErrorService = externalApiErrorService;
+            _repository = repository;
         }
 
         
@@ -95,9 +103,40 @@ namespace Leaguelane.Service.Services
             }
         }
 
-        public async Task<List<Bookmaker>> GetAllBookmakersAsync(CancellationToken cancellationToken)
+        public async Task<(int total,List<Bookmaker>)> GetAllBookmakersAsync(int page, int pageSize, string search, CancellationToken cancellationToken)
         {
-            return await _bookmakerRepository.GetAllBookmakersAsync(cancellationToken);
+            var bookmakers = await _repository.GetAllAsync<Bookmaker>();
+
+            return (bookmakers.Count(), bookmakers.OrderBy(x => x.BookmakerId).Skip((page - 1) * pageSize).Take(pageSize).ToList());
+        }
+
+        public async Task<List<Bookmaker>> GetAllActiveBookmakersAsync(CancellationToken cancellationToken)
+        {
+            return await _bookmakerRepository.GetActiveBookmakersAsync(cancellationToken);
+        }
+
+        public async Task<bool> EnableBookmakerAsync(int id, CancellationToken cancellationToken)
+        {
+            var bookmaker = await _repository.GetByIdAsync<Bookmaker>(id, cancellationToken);
+
+            if (bookmaker == null) throw new Exception("Bookmaker not found");
+            bookmaker.Active = true;
+            await _repository.UpdateAsync(bookmaker);
+            await _repository.SaveChangesAsync<Bookmaker>(cancellationToken);
+
+            return true;
+        }
+
+        public async Task<bool> DisableBookmakerAsync(int id, CancellationToken cancellationToken)
+        {
+            var bookmaker = await _repository.GetByIdAsync<Bookmaker>(id, cancellationToken);
+
+            if (bookmaker == null) throw new Exception("Bookmaker not found");
+            bookmaker.Active = false;
+            await _repository.UpdateAsync(bookmaker);
+            await _repository.SaveChangesAsync<Bookmaker>(cancellationToken);
+
+            return true;
         }
     }
 }

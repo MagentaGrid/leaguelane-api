@@ -30,7 +30,7 @@ namespace Leaguelane.ApiService.Feature
 
         public async Task<BaseResponse> GetAllBookmakers(CancellationToken cancellationToken)
         {
-            var bookmakers = await _bookmakerService.GetAllBookmakersAsync(cancellationToken);
+            var bookmakers = await _bookmakerService.GetAllActiveBookmakersAsync(cancellationToken);
 
             if (bookmakers == null)
             {

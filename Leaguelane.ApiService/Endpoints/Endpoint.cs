@@ -1,5 +1,4 @@
 ﻿using Leaguelane.Api.Endpoints;
-using System.Text;
 
 namespace Leaguelane.ApiService.Endpoints
 {
@@ -20,7 +19,8 @@ namespace Leaguelane.ApiService.Endpoints
             app.MapGroup("/articles").AddArticleRoutes().WithName("Articles").WithTags("Article");
             app.MapGroup("/leagues").AddLeagueRoutes().WithName("League").WithTags("League");
             app.MapGroup("/teams").AddTeamRoutes().WithName("Team").WithTags("Team");
-             app.MapGroup("/file").AddFileRoutes().WithName("File").WithTags("File");
+            app.MapGroup("/file").AddFileRoutes().WithName("File").WithTags("File");
+            app.MapGroup("/bookmakers").AddBookmakerRoutes().WithName("Bookmaker").WithTags("Bookmaker");
         }
     }
 }

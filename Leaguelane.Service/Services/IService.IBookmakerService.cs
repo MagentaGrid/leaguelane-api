@@ -11,6 +11,9 @@ namespace Leaguelane.Service.Services
         Task SoftDeleteBookmakerAsync(int id, CancellationToken cancellationToken);
         Task RestoreBookmakerAsync(int id, CancellationToken cancellationToken);
         Task<bool> ImportBookmakersFromApiAsync(CancellationToken cancellationToken);
-        Task<List<Bookmaker>> GetAllBookmakersAsync(CancellationToken cancellationToken);
+        Task<(int total, List<Bookmaker>)> GetAllBookmakersAsync(int page, int pageSize, string search, CancellationToken cancellationToken);
+        Task<List<Bookmaker>> GetAllActiveBookmakersAsync(CancellationToken cancellationToken);
+        Task<bool> EnableBookmakerAsync(int id, CancellationToken cancellationToken);
+        Task<bool> DisableBookmakerAsync(int id, CancellationToken cancellationToken);
     }
 }
